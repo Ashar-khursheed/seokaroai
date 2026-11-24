@@ -139,6 +139,23 @@ export function planChangedEmail(planName: string, status: string) {
   };
 }
 
+export function aiAllowanceEmail(o: { pct: number; planName: string; resets: string; url: string; topPlan: boolean }) {
+  const out = o.pct >= 100;
+  const next = o.topPlan ? "Reply to this email if you need more for a client project." : "Upgrade for a bigger allowance, or it resets automatically.";
+  return {
+    subject: out ? "Your AI allowance for this month is used up" : `You have used ${o.pct}% of this month's AI allowance`,
+    html: layout({
+      preheader: out ? `AI runs are paused until ${o.resets}.` : "A heads-up so nothing stops unexpectedly.",
+      heading: out ? "AI allowance used up" : `${o.pct}% of your AI allowance used`,
+      body: out
+        ? `Your <b>${esc(o.planName)}</b> plan's AI allowance for this month is used up. AI deep audits, keyword battles, auto-fixes and rank checks are paused until <b>${esc(o.resets)}</b>. Site audits, reports and everything you already have keep working.<br><br>${esc(next)}`
+        : `Your <b>${esc(o.planName)}</b> plan has used <b>${o.pct}%</b> of this month's AI allowance (AI audits, keyword battles, auto-fixes and rank checks). When it runs out, those pause until <b>${esc(o.resets)}</b>.<br><br>${esc(next)}`,
+      cta: { label: o.topPlan ? "View usage" : "View usage and plans", url: o.url },
+    }),
+    text: text(out ? `Your AI allowance is used up. AI runs and rank checks pause until ${o.resets}.` : `You have used ${o.pct}% of this month's AI allowance.`, next, o.url),
+  };
+}
+
 export function contactAdminEmail(m: { name: string; email: string; company?: string | null; message: string }) {
   return {
     subject: `Contact form: ${m.name}`,

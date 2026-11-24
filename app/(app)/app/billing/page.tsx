@@ -1,12 +1,12 @@
 import { requireUser } from "@/lib/auth";
 import { config } from "@/lib/config";
 import { effectivePlan, PAID_PLANS, PLANS, type Cycle } from "@/lib/plans";
-import { monthlyUsage } from "@/lib/usage";
+import { aiAllowance, fmtReset, monthlyUsage } from "@/lib/usage";
 import { paddleSettings } from "@/lib/integrations";
 import { billingConfigured, priceIdFor, signedCustomData } from "@/lib/billing/paddle";
 import { CheckoutButton } from "@/components/client";
 import { Icon } from "@/components/icons";
-import { Card, Meter, PageHeader } from "@/components/ui";
+import { AllowanceMeter, Card, Meter, PageHeader } from "@/components/ui";
 import { openBillingPortal } from "../actions";
 
 export const metadata = { title: "Billing" };
@@ -15,7 +15,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
   const sp = await searchParams;
   const user = await requireUser();
   const plan = effectivePlan(user);
-  const usage = await monthlyUsage(user.id);
+  const [usage, allowance] = await Promise.all([monthlyUsage(user.id), aiAllowance(user)]);
   const cycle: Cycle = sp.cycle === "yearly" ? "yearly" : "monthly";
   const [ready, paddle] = await Promise.all([billingConfigured(), paddleSettings()]);
   const priceIds = Object.fromEntries(await Promise.all(PAID_PLANS.map(async (c) => [c, await priceIdFor(c, cycle)] as const)));
@@ -45,6 +45,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
         </Card>
         <Card title="Usage this month">
           <div className="space-y-3.5">
+            <AllowanceMeter pct={allowance.pct} resets={fmtReset(allowance.resetsAt)} />
             <Meter label="Site audits" used={usage.quick} limit={plan.limits.quickAudits} />
             <Meter label="AI deep audits" used={usage.deep} limit={plan.limits.deepAudits} />
             <Meter label="Keyword battles" used={usage.keyword} limit={plan.limits.battles} />

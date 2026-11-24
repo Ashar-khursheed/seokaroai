@@ -5,7 +5,8 @@ import { config } from "@/lib/config";
 import { createRun, executeRun } from "@/lib/runs";
 import { checkRank, rankTrackingAvailable } from "@/lib/engine/ranks";
 import { effectivePlan } from "@/lib/plans";
-import { runBlocked } from "@/lib/usage";
+import { aiAllowance, runBlocked } from "@/lib/usage";
+import { budgetAlerts } from "@/lib/budget-alerts";
 import { sendMail } from "@/lib/email";
 import { rankAlertEmail, weeklyDigestEmail, type DigestProject, type RankMove } from "@/lib/email/templates";
 
@@ -129,10 +130,25 @@ async function rankChecks() {
     .where(and(ne(schema.projects.rankFrequency, "off"), or(isNull(schema.keywords.nextCheckAt), lte(schema.keywords.nextCheckAt, now)), isNull(schema.users.suspendedAt)))
     .orderBy(asc(schema.keywords.nextCheckAt)).limit(40);
   const moves = new Map<number, { email: string; alerts: boolean; list: RankMove[] }>();
+  // Rank checks are paid API calls and count toward the monthly AI allowance: when it is used up,
+  // that customer's checks wait until the 1st (they got an email at 80% and at 100%).
+  const left = new Map<number, Promise<number>>();
+  const allowanceLeft = (u: (typeof due)[number]["u"]) => {
+    if (u.role === "admin") return Promise.resolve(Infinity);
+    if (!left.has(u.id)) left.set(u.id, aiAllowance(u).then((a) => a.remainingUsd));
+    return left.get(u.id)!;
+  };
+  const checked = new Set<number>();
   let i = 0;
   await Promise.all(Array.from({ length: 3 }, async () => {
     while (i < due.length) {
       const { k, p, u } = due[i++];
+      if ((await allowanceLeft(u)) <= 0.01) {
+        const n = new Date();
+        await db().update(schema.keywords).set({ nextCheckAt: new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth() + 1, 1, 1)) }).where(eq(schema.keywords.id, k.id));
+        continue;
+      }
+      checked.add(u.id);
       const plan = effectivePlan(u);
       const freq = plan.rankFrequencies.includes(p.rankFrequency as never) ? p.rankFrequency : "weekly";
       const next = new Date(Date.now() + (freq === "daily" ? DAY : 7 * DAY));
@@ -154,6 +170,7 @@ async function rankChecks() {
       }
     }
   }));
+  for (const userId of checked) await budgetAlerts(userId).catch((e) => console.error("[worker] budgetAlerts", e));
   for (const [userId, m] of moves) {
     if (!m.alerts || !m.list.length) continue;
     const mail = rankAlertEmail(m.list, `${config.appUrl}/app`);

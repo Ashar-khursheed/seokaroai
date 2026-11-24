@@ -23,7 +23,8 @@ import { sendMail } from "@/lib/email";
 import { runDoneEmail } from "@/lib/email/templates";
 import { effectivePlan } from "@/lib/plans";
 import { readJson, runFolder, type AuditInput, type KeywordInput } from "@/lib/files";
-import type { RunKind } from "@/lib/usage";
+import { aiAllowance, type RunKind } from "@/lib/usage";
+import { budgetAlerts } from "@/lib/budget-alerts";
 import type { Run } from "@/lib/db/schema";
 
 export interface RunEvent {
@@ -145,6 +146,7 @@ export async function executeRun(run: Run, workerId: string) {
   l.emitter.emit("end");
   live.delete(run.id);
   await afterRun(run, status, score, summary).catch((e) => console.error("[runs] afterRun", e));
+  if (cost) await budgetAlerts(run.userId).catch((e) => console.error("[runs] budgetAlerts", e));
 }
 
 async function afterRun(run: Run, status: string, score: number | null, summary: Record<string, unknown>) {
@@ -217,10 +219,17 @@ async function runAgent(run: Run, dir: string, abort: AbortController): Promise<
   if (!(await providerReady(ai.provider))) return { cost: null, turns: null, error: `AI runs are not configured on this server (${ai.provider === "openai" ? "OPENAI_API_KEY" : "ANTHROPIC_API_KEY"} missing).` };
   const [user] = await db().select().from(schema.users).where(eq(schema.users.id, run.userId)).limit(1);
   const plan = effectivePlan(user!);
+  // The monthly allowance caps every run too (admins are not metered against a plan).
+  const left = user!.role === "admin" ? MAX_RUN_USD : (await aiAllowance(user!)).remainingUsd;
+  if (left <= 0.05) return { cost: null, turns: null, error: "This month's AI allowance is used up. It resets on the 1st." };
+  const exec = (prompt: string, model: string, budget: number, phases?: Phases) => {
+    if (left < budget) emit(run.id, { kind: "info", text: `Run budget lowered to the allowance left this month` });
+    return agentExec(run.id, dir, prompt, model, Math.min(budget, left), abort, phases);
+  };
   if (run.kind === "fix") {
     const { codeFixPrompt } = await import("@/lib/fixes");
     const prompt = await codeFixPrompt(run, dir);
-    return agentExec(run.id, dir, prompt, ai.claudeModel, plan.fixBudgetUsd, abort);
+    return exec(prompt, ai.claudeModel, plan.fixBudgetUsd);
   }
   let prompt: string;
   let model: string;
@@ -247,7 +256,7 @@ async function runAgent(run: Run, dir: string, abort: AbortController): Promise<
     prompt = auditPrompt(a);
     phases = auditPhases(a);
   }
-  return agentExec(run.id, dir, prompt, model, budget, abort, phases);
+  return exec(prompt, model, budget, phases);
 }
 
 /** Run an agent prompt in `dir` with the platform provider (Claude Agent SDK or OpenAI agent loop). */

@@ -29,6 +29,8 @@ export interface Plan {
   battleBudgetUsd: number;
   /** Spend cap per AI code-fix run (connector folder, GitHub, local). */
   fixBudgetUsd: number;
+  /** Monthly AI allowance in USD (AI runs + rank checks). Hard stop: guarantees the plan never loses money. */
+  aiBudgetUsd: number;
   highlights: string[];
   popular?: boolean;
 }
@@ -39,32 +41,32 @@ export const PLANS: Record<PlanCode, Plan> = {
     tagline: "See where your website stands today.",
     limits: { projects: 1, quickAudits: 5, deepAudits: 0, battles: 1, keywords: 10, pagesPerAudit: 10, fixes: 1 },
     rankFrequencies: ["off", "weekly"], autoAudits: ["off", "monthly"],
-    deepBudgetUsd: 0, battleBudgetUsd: 0.75, fixBudgetUsd: 0.5,
-    highlights: ["1 website", "5 site audits a month", "1 keyword battle a month", "10 tracked keywords, weekly", "Monthly automatic audit", "1 AI auto-fix a month", "Email alerts"],
+    deepBudgetUsd: 0, battleBudgetUsd: 0.75, fixBudgetUsd: 0.5, aiBudgetUsd: 1.5,
+    highlights: ["1 website", "5 site audits a month", "1 keyword battle a month", "10 tracked keywords, weekly", "Monthly automatic audit", "1 AI auto-fix a month", "Email alerts", "Fair-use AI allowance, live in your dashboard"],
   },
   starter: {
     code: "starter", name: "Starter", priceMonthly: 39, priceYearly: 390,
     tagline: "For a business that wants to rank its own site.",
     limits: { projects: 3, quickAudits: 40, deepAudits: 2, battles: 10, keywords: 100, pagesPerAudit: 50, fixes: 10 },
     rankFrequencies: ["off", "weekly", "daily"], autoAudits: ["off", "monthly", "weekly"],
-    deepBudgetUsd: 2.5, battleBudgetUsd: 1, fixBudgetUsd: 0.75,
-    highlights: ["3 websites", "2 AI deep audits a month", "10 keyword battles a month", "100 keywords tracked daily", "40 site audits a month", "Weekly automatic audits", "10 AI auto-fixes a month (WordPress, Shopify, GitHub)", "Weekly email report"],
+    deepBudgetUsd: 2.5, battleBudgetUsd: 1, fixBudgetUsd: 0.75, aiBudgetUsd: 15,
+    highlights: ["3 websites", "2 AI deep audits a month", "10 keyword battles a month", "100 keywords tracked daily", "40 site audits a month", "Weekly automatic audits", "10 AI auto-fixes a month (WordPress, Shopify, GitHub)", "Weekly email report", "Fair-use AI allowance, live in your dashboard"],
   },
   pro: {
     code: "pro", name: "Pro", priceMonthly: 99, priceYearly: 990, popular: true,
     tagline: "For teams that publish and optimise every week.",
     limits: { projects: 10, quickAudits: 200, deepAudits: 6, battles: 30, keywords: 300, pagesPerAudit: 100, fixes: 40 },
     rankFrequencies: ["off", "weekly", "daily"], autoAudits: ["off", "monthly", "weekly"],
-    deepBudgetUsd: 3, battleBudgetUsd: 1, fixBudgetUsd: 1,
-    highlights: ["10 websites", "6 AI deep audits a month", "30 keyword battles a month", "300 keywords tracked daily", "200 site audits a month", "Competitor gap analysis", "40 AI auto-fixes a month", "Content briefs and cluster maps"],
+    deepBudgetUsd: 3, battleBudgetUsd: 1, fixBudgetUsd: 1, aiBudgetUsd: 45,
+    highlights: ["10 websites", "6 AI deep audits a month", "30 keyword battles a month", "300 keywords tracked daily", "200 site audits a month", "Competitor gap analysis", "40 AI auto-fixes a month", "Content briefs and cluster maps", "Fair-use AI allowance, live in your dashboard"],
   },
   agency: {
     code: "agency", name: "Agency", priceMonthly: 249, priceYearly: 2490,
     tagline: "For agencies running SEO for many clients.",
     limits: { projects: 30, quickAudits: 1000, deepAudits: 15, battles: 80, keywords: 1000, pagesPerAudit: 300, fixes: 150 },
     rankFrequencies: ["off", "weekly", "daily"], autoAudits: ["off", "monthly", "weekly"],
-    deepBudgetUsd: 3, battleBudgetUsd: 1, fixBudgetUsd: 1,
-    highlights: ["30 websites", "15 AI deep audits a month", "80 keyword battles a month", "1,000 keywords tracked daily", "1,000 site audits a month", "Printable client reports", "150 AI auto-fixes a month", "Priority support"],
+    deepBudgetUsd: 3, battleBudgetUsd: 1, fixBudgetUsd: 1, aiBudgetUsd: 110,
+    highlights: ["30 websites", "15 AI deep audits a month", "80 keyword battles a month", "1,000 keywords tracked daily", "1,000 site audits a month", "Printable client reports", "150 AI auto-fixes a month", "Priority support", "Fair-use AI allowance, live in your dashboard"],
   },
 };
 

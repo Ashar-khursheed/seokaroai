@@ -3,13 +3,13 @@ import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { requireUser } from "@/lib/auth";
 import { db, parseJson, schema } from "@/lib/db";
 import { effectivePlan } from "@/lib/plans";
-import { monthlyUsage } from "@/lib/usage";
+import { aiAllowance, fmtReset, monthlyUsage } from "@/lib/usage";
 import { rankBuckets, recentRuns, userProjects } from "@/lib/queries";
 import { rankTrackingAvailable } from "@/lib/engine/ranks";
 import { AutoRefresh } from "@/components/client";
 import { Reveal } from "@/components/motion";
 import { Icon } from "@/components/icons";
-import { Card, Delta, KIND_ICON, KIND_LABEL, Meter, PageHeader, Position, ScoreRing, StatusPill, timeAgo } from "@/components/ui";
+import { AllowanceMeter, Card, Delta, KIND_ICON, KIND_LABEL, Meter, PageHeader, Position, ScoreRing, StatusPill, timeAgo } from "@/components/ui";
 
 export const metadata = { title: "Overview" };
 
@@ -17,7 +17,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const user = await requireUser();
   const plan = effectivePlan(user);
-  const [projects, usage, runs] = await Promise.all([userProjects(user.id), monthlyUsage(user.id), recentRuns({ userId: user.id, limit: 8 })]);
+  const [projects, usage, runs, allowance] = await Promise.all([userProjects(user.id), monthlyUsage(user.id), recentRuns({ userId: user.id, limit: 8 }), aiAllowance(user)]);
+  const isAdmin = user.role === "admin";
   const ids = projects.map((p) => p.id);
   const kws = ids.length ? await db().select().from(schema.keywords).where(inArray(schema.keywords.projectId, ids)) : [];
   const movers = kws
@@ -36,6 +37,14 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     <div className="space-y-8">
       <AutoRefresh active={running} ms={10000} />
       {sp.verified === "1" && <Notice tone="ok">Email confirmed. You are all set.</Notice>}
+      {!isAdmin && allowance.pct >= 80 && (
+        <Notice tone="warn">
+          {allowance.pct >= 100
+            ? `This month's AI allowance is used up. AI audits, keyword battles, auto-fixes and rank checks pause until ${fmtReset(allowance.resetsAt)}; site audits keep working.`
+            : `You have used ${allowance.pct}% of this month's AI allowance. It resets on ${fmtReset(allowance.resetsAt)}.`}
+          {plan.code !== "agency" && <> <Link href="/app/billing" className="font-medium underline">See plans</Link></>}
+        </Notice>
+      )}
       {sp.verified === "invalid" && <Notice tone="warn">That confirmation link is invalid or expired. Use “Resend email” above.</Notice>}
 
       <PageHeader
@@ -116,6 +125,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </Card>
         <Card title="Usage this month" action={plan.code !== "agency" ? <Link href="/app/billing" className="text-[12.5px] font-medium text-brand-500">Upgrade</Link> : undefined}>
           <div className="space-y-4">
+            {!isAdmin && <AllowanceMeter pct={allowance.pct} resets={fmtReset(allowance.resetsAt)} note={false} />}
             <Meter label="Websites" used={usage.projects} limit={plan.limits.projects} />
             <Meter label="Site audits" used={usage.quick} limit={plan.limits.quickAudits} />
             <Meter label="AI deep audits" used={usage.deep} limit={plan.limits.deepAudits} />

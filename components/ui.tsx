@@ -162,6 +162,20 @@ export function Meter({ label, used, limit }: { label: string; used: number; lim
   );
 }
 
+/** Monthly AI allowance as a percentage (customers never see dollar costs). */
+export function AllowanceMeter({ pct, resets, note = true }: { pct: number; resets: string; note?: boolean }) {
+  const col = pct >= 100 ? "#f43f5e" : pct >= 80 ? "#f59e0b" : "#1f86ff";
+  return (
+    <div>
+      <div className="mb-1.5 flex justify-between gap-2 text-[12.5px]"><span className="whitespace-nowrap font-medium">AI allowance</span><span className="muted whitespace-nowrap tabular-nums">{pct}% used{note ? "" : ` · resets ${resets}`}</span></div>
+      <div className="h-2 overflow-hidden rounded-full bg-[var(--panel2)]"><div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${Math.max(pct, 1)}%`, background: col }} /></div>
+      {note && <p className="muted mt-1.5 text-[11.5px] leading-snug">
+        {pct >= 100 ? "Used up: AI audits, battles, auto-fixes and rank checks pause until it resets. Site audits keep working."
+          : "Shared by AI deep audits, keyword battles, auto-fixes and rank checks. We email you at 80%."} Resets {resets}.</p>}
+    </div>
+  );
+}
+
 export function timeAgo(d: Date | null | undefined) {
   if (!d) return "never";
   const s = (Date.now() - d.getTime()) / 1000;

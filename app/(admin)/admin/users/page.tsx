@@ -1,6 +1,7 @@
 import { desc, like, or } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
-import { getPlan, PLANS } from "@/lib/plans";
+import { effectivePlan, getPlan, PLANS } from "@/lib/plans";
+import { monthlyAiSpend } from "@/lib/usage";
 import { Card, timeAgo } from "@/components/ui";
 import { setUserPlan, toggleSuspend, verifyUserEmail } from "../actions";
 
@@ -12,6 +13,7 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
   const users = await db().select().from(schema.users)
     .where(term ? or(like(schema.users.email, `%${term}%`), like(schema.users.name, `%${term}%`)) : undefined)
     .orderBy(desc(schema.users.createdAt)).limit(200);
+  const spend = new Map(await Promise.all(users.map(async (u) => [u.id, await monthlyAiSpend(u.id)] as const)));
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-semibold tracking-[-0.02em]">Users</h1>
@@ -19,12 +21,16 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
       <Card>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-sm">
-            <thead><tr className="muted border-b line text-left text-xs"><th className="py-2">User</th><th>Plan</th><th>Status</th><th>Signed up</th><th>Last login</th><th>Actions</th></tr></thead>
+            <thead><tr className="muted border-b line text-left text-xs"><th className="py-2">User</th><th>Plan</th><th>Status</th><th>AI cost this month</th><th>Signed up</th><th>Last login</th><th>Actions</th></tr></thead>
             <tbody>{users.map((u) => (
               <tr key={u.id} className="border-b line align-top last:border-0">
                 <td className="py-2.5"><b>{u.email}</b> {u.role === "admin" && <span className="rounded bg-amber-300 px-1 text-[10px] font-bold text-black">ADMIN</span>}<div className="muted text-xs">{u.name} · #{u.id} {u.emailVerifiedAt ? "· confirmed" : "· not confirmed"}</div></td>
                 <td>{getPlan(u.plan).name}{u.billingCycle ? <span className="muted text-xs"> ({u.billingCycle})</span> : null}</td>
                 <td>{u.suspendedAt ? <span className="text-rose-600">suspended</span> : u.planStatus}</td>
+                <td className="tabular-nums text-xs">{(() => {
+                  const s = spend.get(u.id) ?? 0; const cap = effectivePlan(u).aiBudgetUsd;
+                  return <span className={u.role !== "admin" && s >= cap * 0.8 ? "text-high" : ""}>${s.toFixed(2)}{u.role === "admin" ? " · not metered" : ` / $${cap}`}</span>;
+                })()}</td>
                 <td className="muted text-xs">{timeAgo(u.createdAt)}</td>
                 <td className="muted text-xs">{timeAgo(u.lastLoginAt)}</td>
                 <td>
