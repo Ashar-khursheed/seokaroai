@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { EventEmitter } from "node:events";
 import { and, eq } from "drizzle-orm";
-import { query, type SDKMessage } from "@anthropic-ai/claude-agent-sdk";
+import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { db, parseJson, schema } from "@/lib/db";
 import { config } from "@/lib/config";
 import { getAiSettings, providerReady } from "@/lib/ai/settings";
@@ -298,6 +298,8 @@ export async function agentExec(runId: string, dir: string, prompt: string, clau
   let turns: number | null = null;
   let error: string | null = null;
   try {
+    // Loaded only for Claude runs: the SDK is large and touches process.stdin on import.
+    const { query } = await import("@anthropic-ai/claude-agent-sdk");
     const q = query({
       prompt,
       options: {
