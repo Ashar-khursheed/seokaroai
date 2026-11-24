@@ -1,0 +1,38 @@
+{
+  "name": "seokaroai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SEOKaroAI: AI SEO audits, rank tracking and keyword battles (Next.js + MySQL + Claude Agent SDK)",
+  "scripts": {
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "next start -p 3100",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node scripts/migrate.mjs --create",
+    "db:seed": "node scripts/seed-posts.mjs",
+    "setup": "npm run db:migrate && npm run db:seed",
+    "create-admin": "node scripts/create-admin.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.318",
+    "drizzle-orm": "^0.45.4",
+    "geist": "^1.9.2",
+    "lucide-react": "^1.70.0",
+    "marked": "17.0.6",
+    "mysql2": "^3.24.6",
+    "next": "16.4.5",
+    "nodemailer": "^10.4.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.4",
+    "@types/node": "24.19.2",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "tailwindcss": "4.3.4",
+    "typescript": "5.9.3"
+  }
+}
