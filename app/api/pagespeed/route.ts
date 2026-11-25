@@ -36,7 +36,9 @@ export async function GET(request: Request) {
 
   try {
     const [mobile, desktop] = await Promise.all([runStrategy('mobile'), runStrategy('desktop')]);
-    return NextResponse.json({ url: target, mobile, desktop });
+    // Include whether CrUX key is configured so callers know if origin data is available
+    const cruxConfigured = !!config.cruxApiKey;
+    return NextResponse.json({ url: target, mobile, desktop, cruxConfigured });
   } catch (err: any) {
     return new NextResponse(JSON.stringify({ error: String(err) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }

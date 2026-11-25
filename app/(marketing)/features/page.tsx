@@ -4,11 +4,13 @@ import { FEATURES } from "@/lib/content/features";
 import { CtaBand } from "@/components/marketing";
 import { Reveal, Spotlight } from "@/components/motion";
 import { Icon } from "@/components/icons";
+import { config } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Product: AI SEO Audit, Auto-Fix, Rank Tracker & Keyword Battle",
-  description: "Everything SEOKaroAI does: AI SEO audits, auto-fixes for WordPress, Shopify and GitHub, competitor keyword analysis, daily rank tracking, AI search optimization and automated reports.",
+  title: "AI SEO Audit & Tools | SEOKaroAI",
+  description: "Explore SEOKaroAI's AI SEO tools: audits, auto-fix, rank tracking and competitor analysis. Try a free audit today.",
   alternates: { canonical: "/features" },
+  openGraph: { images: [`${config.appUrl}/opengraph-image`] },
 };
 
 export default function Features() {
