@@ -17,7 +17,15 @@ export function connectorCreds(c: Connector) {
 }
 
 export async function testConnector(c: Connector) {
-  const { cfg, secret } = connectorCreds(c);
+  let cfg: Record<string, string>;
+  let secret: string;
+  try {
+    ({ cfg, secret } = connectorCreds(c));
+  } catch (e) {
+    const message = String((e as Error).message ?? e).slice(0, 300);
+    await db().update(schema.connectors).set({ status: "error", lastError: message, lastTestedAt: new Date() }).where(eq(schema.connectors.id, c.id));
+    return { ok: false, message };
+  }
   const driver = CMS[c.kind] ?? CODE[c.kind];
   const r = c.kind === "local" ? { ok: true, message: "Folder access is granted in your browser each time." } : driver ? await driver.test(cfg, secret) : { ok: false, message: "Unknown connector" };
   await db().update(schema.connectors).set({ status: r.ok ? "ok" : "error", lastError: r.ok ? null : r.message, lastTestedAt: new Date() }).where(eq(schema.connectors.id, c.id));

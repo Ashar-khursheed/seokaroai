@@ -185,8 +185,14 @@ export async function applyChanges(user: User, runId: string, ids: number[]): Pr
   const changes = (await db().select().from(schema.fixChanges).where(eq(schema.fixChanges.runId, runId)))
     .filter((c) => ids.includes(c.id) && ["proposed", "failed", "reverted"].includes(c.status));
   if (!changes.length) return { applied: 0, failed: 0, error: "Select at least one change." };
-  const [conn] = await db().select().from(schema.connectors).where(eq(schema.connectors.id, changes[0].connectorId ?? 0)).limit(1);
-  if (!conn) return { applied: 0, failed: 0, error: "The connector was deleted." };
+  let [conn] = await db().select().from(schema.connectors).where(eq(schema.connectors.id, changes[0].connectorId ?? 0)).limit(1);
+  if (!conn && run.projectId) {
+    // If the original connector was deleted and re-added, fall back to an active matching connector on the project.
+    const wantKind = changes[0].resourceType === "file" ? "github" : null;
+    const all = await db().select().from(schema.connectors).where(eq(schema.connectors.projectId, run.projectId));
+    conn = (wantKind ? all.find((x) => x.kind === wantKind) : undefined) ?? all[0];
+  }
+  if (!conn) return { applied: 0, failed: 0, error: "The connector was deleted. Reconnect it in your project's Connect & fix tab and try again." };
   const { cfg, secret } = connectorCreds(conn);
   const mark = (id: number, status: string, error: string | null = null) =>
     db().update(schema.fixChanges).set({ status, error, appliedAt: status === "applied" ? new Date() : null }).where(eq(schema.fixChanges.id, id));

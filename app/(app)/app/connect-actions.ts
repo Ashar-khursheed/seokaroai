@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { rateLimit, requireUser } from "@/lib/auth";
 import { encrypt } from "@/lib/crypto";
@@ -58,11 +58,27 @@ export async function saveConnector(_: FormState, fd: FormData): Promise<FormSta
   } else {
     return { error: "Choose a connector type." };
   }
-  const res = await db().insert(schema.connectors).values({
-    userId: user.id, projectId: p.id, kind, name: name.slice(0, 120), config: JSON.stringify(config),
-    secret: secret ? encrypt(secret) : null, createdAt: new Date(),
-  });
-  const id = Number((res[0] as { insertId: number }).insertId);
+  const finalName = name.slice(0, 120);
+  const encrypted = secret ? encrypt(secret) : null;
+  const [existing] = await db()
+    .select()
+    .from(schema.connectors)
+    .where(and(eq(schema.connectors.projectId, p.id), eq(schema.connectors.kind, kind), eq(schema.connectors.name, finalName)))
+    .limit(1);
+  let id: number;
+  if (existing) {
+    id = existing.id;
+    await db()
+      .update(schema.connectors)
+      .set({ config: JSON.stringify(config), secret: encrypted, status: "untested", lastError: null })
+      .where(eq(schema.connectors.id, id));
+  } else {
+    const res = await db().insert(schema.connectors).values({
+      userId: user.id, projectId: p.id, kind, name: finalName, config: JSON.stringify(config),
+      secret: encrypted, createdAt: new Date(),
+    });
+    id = Number((res[0] as { insertId: number }).insertId);
+  }
   const [c] = await db().select().from(schema.connectors).where(eq(schema.connectors.id, id)).limit(1);
   const t = await testConnector(c);
   revalidatePath(`/app/projects/${p.id}`);
