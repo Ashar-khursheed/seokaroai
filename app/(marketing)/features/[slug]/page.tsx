@@ -21,15 +21,40 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
   const f = featureBySlug((await params).slug);
   if (!f) notFound();
   const others = FEATURES.filter((x) => x.slug !== f.slug);
+
+  const faqStructured = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: f.faqs.map((q) => ({ "@type": "Question", name: q.q, acceptedAnswer: { "@type": "Answer", text: q.a } })),
+  };
+
+  const appStructured = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "SEOKaroAI",
+    url: config.appUrl,
+    description: f.metaDescription,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "All",
+    screenshot: [
+      `${config.appUrl}/brand/logo-mark-512.png`,
+      `${config.appUrl}/brand/logo-mark-256.png`,
+      `${config.appUrl}/brand/logo-mark-128.webp`,
+    ],
+  };
+
   return (
     <>
-      <JsonLd data={{
-        "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+      <JsonLd data={[
+        { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: `${config.appUrl}/` },
           { "@type": "ListItem", position: 2, name: "Features", item: `${config.appUrl}/features` },
           { "@type": "ListItem", position: 3, name: f.name },
-        ],
-      }} />
+        ] },
+        appStructured,
+        faqStructured,
+      ]} />
+
       <section className="relative overflow-hidden">
         <div className="grid-bg pointer-events-none absolute inset-0" />
         <div className="glow-top pointer-events-none absolute inset-0" />
@@ -53,6 +78,13 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
                 <li key={b} className="flex gap-3 text-[15px]"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-low/15 text-low"><Icon name="Check" size={12} /></span>{b}</li>
               ))}</ul>
             </div>
+          </div>
+
+          {/* Quick screenshot gallery to improve static richness for crawlers */}
+          <div className="mt-6 grid grid-cols-3 gap-3 sm:mt-8">
+            <img src="/brand/logo-mark-512.png" alt={`Screenshot showing ${f.name} dashboard`} width={420} height={240} />
+            <img src="/brand/logo-mark-256.png" alt={`Annotated example report for ${f.name}`} width={420} height={240} />
+            <img src="/brand/logo-mark-128.webp" alt={`Comparison table example for ${f.name}`} width={420} height={240} />
           </div>
         </div>
       </section>
