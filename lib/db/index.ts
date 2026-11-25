@@ -10,7 +10,14 @@ function pool(): mysql.Pool {
     if (!url) throw new Error("DATABASE_URL is not set. Add it to .env.local.");
     g.__skPool = mysql.createPool({
       uri: url,
-      connectionLimit: Number(process.env.DB_POOL_SIZE || 10),
+      connectionLimit: Number(process.env.DB_POOL_SIZE || 5),
+      maxIdle: 2,
+      idleTimeout: 20_000,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 10_000,
+      connectTimeout: 10_000,
+      waitForConnections: true,
+      queueLimit: 0,
       timezone: "Z",
       dateStrings: false,
       charset: "utf8mb4",
