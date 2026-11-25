@@ -10,6 +10,30 @@ const MAX_TOTAL_BYTES = 40 * 1024 * 1024; // 40 MB per run
 const MAX_FILES = 400;
 
 const inflight = new Map<string, Promise<number>>();
+let tableReady: Promise<void> | null = null;
+
+function ensureTable(): Promise<void> {
+  if (!tableReady) {
+    tableReady = rawPool()
+      .query(
+        `CREATE TABLE IF NOT EXISTS run_files (
+          run_id VARCHAR(100) NOT NULL,
+          path VARCHAR(255) NOT NULL,
+          content LONGBLOB NOT NULL,
+          size INT UNSIGNED NOT NULL DEFAULT 0,
+          updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+          PRIMARY KEY (run_id, path),
+          CONSTRAINT fk_run_files_run FOREIGN KEY (run_id) REFERENCES runs(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      )
+      .then(() => undefined)
+      .catch((e) => {
+        tableReady = null;
+        throw e;
+      });
+  }
+  return tableReady;
+}
 
 function collectPersistable(root: string): { rel: string; full: string; size: number }[] {
   const out: { rel: string; full: string; size: number }[] = [];
@@ -50,6 +74,7 @@ export async function saveRunFilesToDb(runId: string): Promise<number> {
   if (files.length === 0) return 0;
 
   const pool = rawPool();
+  await ensureTable();
   const now = new Date();
   let saved = 0;
   for (const f of files) {
@@ -85,6 +110,7 @@ export async function ensureRunFiles(runId: string, opts?: { onlyPath?: string; 
     if (!target) return 0;
     if (!opts.force && fs.existsSync(target)) return 0;
     try {
+      await ensureTable();
       const [rows] = await rawPool().query<RowDataPacket[]>(
         "SELECT path, content FROM run_files WHERE run_id = ? AND path = ? LIMIT 1",
         [runId, opts.onlyPath],
@@ -107,6 +133,7 @@ export async function ensureRunFiles(runId: string, opts?: { onlyPath?: string; 
 
   const task = (async () => {
     try {
+      await ensureTable();
       const [rows] = await rawPool().query<RowDataPacket[]>(
         "SELECT path, content FROM run_files WHERE run_id = ?",
         [runId],
