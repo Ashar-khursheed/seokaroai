@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: u("/"), lastModified: newest ?? now },
     { url: u("/pricing"), lastModified: now },
+    { url: u("/tutorials"), lastModified: now },
     { url: u("/features"), lastModified: now },
     ...FEATURES.map((f) => ({ url: u(`/features/${f.slug}`), lastModified: now })),
     { url: u("/blog"), lastModified: newest ?? now },

@@ -26,7 +26,7 @@ export function MarketingHeader() {
               </div>
             </div>
           </div>
-          {[["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"]].map(([l, h]) => (
+          {[["Tutorials", "/tutorials"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"]].map(([l, h]) => (
             <Link key={h} href={h} className="muted rounded-lg px-3 py-2 transition hover:text-[var(--ink)]">{l}</Link>
           ))}
         </nav>
@@ -43,7 +43,7 @@ export function MarketingHeader() {
                   </Link>
                 ))}
                 <div className="hairline my-3" />
-                {[["All features", "/features"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"], ["Contact", "/contact"]].map(([l, h]) => (
+                {[["All features", "/features"], ["Video Tutorials", "/tutorials"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"], ["Contact", "/contact"]].map(([l, h]) => (
                   <Link key={h} href={h} className="block rounded-lg px-3 py-2.5 text-[15px] font-medium hover:bg-[var(--panel2)]">{l}</Link>
                 ))}
               </div>
@@ -69,7 +69,7 @@ export function MarketingFooter() {
           <a className="muted mt-4 inline-flex items-center gap-2 break-all text-sm hover:text-[var(--ink)]" href={`mailto:${config.supportEmail}`}><Icon name="Mail" size={15} />{config.supportEmail}</a>
         </div>
         <FooterCol title="Product" links={[...FEATURES.map((f) => [f.name, `/features/${f.slug}`] as [string, string]), ["Pricing", "/pricing"]]} />
-        <FooterCol title="Resources" links={[["Blog", "/blog"], ["RSS", "/blog/rss.xml"], ["llms.txt", "/llms.txt"], ["Sitemap", "/sitemap.xml"]]} />
+        <FooterCol title="Resources" links={[["Video Tutorials", "/tutorials"], ["Blog", "/blog"], ["RSS", "/blog/rss.xml"], ["llms.txt", "/llms.txt"], ["Sitemap", "/sitemap.xml"]]} />
         <FooterCol title="Company" links={[["About", "/about"], ["Contact", "/contact"], ["Privacy", "/legal/privacy"], ["Terms", "/legal/terms"], ["Refunds", "/legal/refund"]]} />
       </div>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t line px-4 py-6 text-xs sm:px-6">

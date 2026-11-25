@@ -4,6 +4,7 @@ import { FEATURES, HOME_FAQS } from "@/lib/content/features";
 import { PLANS, PAID_PLANS } from "@/lib/plans";
 import { config } from "@/lib/config";
 import { CtaBand, FaqList, JsonLd, SectionHead } from "@/components/marketing";
+import { HomeTutorialsSection } from "@/components/tutorial-player";
 import { AgentConsole, CountUp, Reveal, Spotlight } from "@/components/motion";
 import { Icon } from "@/components/icons";
 
@@ -245,6 +246,15 @@ export default function Home() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* Video tutorials */}
+      <section id="tutorials" className="mx-auto mt-20 max-w-6xl px-4 sm:mt-32 sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <SectionHead eyebrow="Video Tutorials" title="See every feature in 20 seconds." text="Short step-by-step walkthroughs of the entire SEOKaroAI workflow — click any lesson to watch." />
+          <Link href="/tutorials" className="btn w-full shrink-0 sm:w-auto">All 8 video tutorials <Icon name="ArrowRight" size={15} /></Link>
+        </div>
+        <HomeTutorialsSection />
       </section>
 
       {/* Pricing teaser */}
