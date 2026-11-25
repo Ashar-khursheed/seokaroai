@@ -189,6 +189,11 @@ export async function createPaddleCatalog(): Promise<string> {
   const made: string[] = [];
   for (const code of PAID_PLANS) {
     const plan = PLANS[code];
+    if (products[code]) {
+      // Verify the saved product ID actually exists in the current Paddle env (sandbox vs production).
+      try { await paddleApi(p.env, p.apiKey, `/products/${encodeURIComponent(products[code])}`); }
+      catch { delete products[code]; }
+    }
     if (!products[code]) {
       const d = await paddleApi(p.env, p.apiKey, "/products", {
         method: "POST",
@@ -199,7 +204,10 @@ export async function createPaddleCatalog(): Promise<string> {
     }
     for (const cycle of ["monthly", "yearly"] as const) {
       const key = `${code}_${cycle}`;
-      if (prices[key]) continue;
+      if (prices[key]) {
+        try { await paddleApi(p.env, p.apiKey, `/prices/${encodeURIComponent(prices[key])}`); continue; }
+        catch { delete prices[key]; }
+      }
       const amount = cycle === "monthly" ? plan.priceMonthly : plan.priceYearly;
       const d = await paddleApi(p.env, p.apiKey, "/prices", {
         method: "POST",
