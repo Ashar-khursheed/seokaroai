@@ -7,9 +7,7 @@ import { CtaBand, FaqList, JsonLd, SectionHead } from "@/components/marketing";
 import { Reveal, Spotlight } from "@/components/motion";
 import { Icon } from "@/components/icons";
 
-// Instant checker is a client component loaded only on the website SEO checker page
-import dynamic from "next/dynamic";
-const InstantChecker = dynamic(() => import("@/components/instant-checker"), { ssr: false });
+import InstantChecker from "@/components/instant-checker";
 
 export function generateStaticParams() {
   return FEATURES.map((f) => ({ slug: f.slug }));
