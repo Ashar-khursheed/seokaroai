@@ -165,7 +165,7 @@ export function CheckoutButton({ priceId, email, customData, env, token, label, 
   return (
     <button className={className} disabled={!ready}
       onClick={() => window.Paddle?.Checkout.open({
-        items: [{ priceId, quantity: 1 }], customer: { email }, customData,
+        items: [{ priceId: priceId.trim(), quantity: 1 }], customer: { email }, customData,
         settings: { displayMode: "overlay", theme: "light", successUrl: `${location.origin}/app/billing?checkout=success` },
       })}>
       {ready ? label : "Loading checkout…"}

@@ -189,10 +189,18 @@ export async function createPaddleCatalog(): Promise<string> {
   const made: string[] = [];
   for (const code of PAID_PLANS) {
     const plan = PLANS[code];
-    if (products[code]) {
-      // Verify the saved product ID actually exists in the current Paddle env (sandbox vs production).
-      try { await paddleApi(p.env, p.apiKey, `/products/${encodeURIComponent(products[code])}`); }
-      catch { delete products[code]; }
+    const prodId = (products[code] || "").trim();
+    if (prodId && /^pro_[a-z0-9]+$/i.test(prodId)) {
+      // Verify the saved product ID actually exists and is active in the current Paddle env.
+      try {
+        const res = await paddleApi(p.env, p.apiKey, `/products/${encodeURIComponent(prodId)}`);
+        if (res?.data?.status !== "active") delete products[code];
+        else products[code] = prodId;
+      } catch {
+        delete products[code];
+      }
+    } else {
+      delete products[code];
     }
     if (!products[code]) {
       const d = await paddleApi(p.env, p.apiKey, "/products", {
@@ -204,10 +212,19 @@ export async function createPaddleCatalog(): Promise<string> {
     }
     for (const cycle of ["monthly", "yearly"] as const) {
       const key = `${code}_${cycle}`;
-      if (prices[key]) {
-        try { await paddleApi(p.env, p.apiKey, `/prices/${encodeURIComponent(prices[key])}`); continue; }
-        catch { delete prices[key]; }
+      const priceId = (prices[key] || "").trim();
+      if (priceId && /^pri_[a-z0-9]+$/i.test(priceId)) {
+        try {
+          const res = await paddleApi(p.env, p.apiKey, `/prices/${encodeURIComponent(priceId)}`);
+          if (res?.data?.status === "active" && res?.data?.product_id === products[code]) {
+            prices[key] = priceId;
+            continue;
+          }
+        } catch {
+          // recreate below
+        }
       }
+      delete prices[key];
       const amount = cycle === "monthly" ? plan.priceMonthly : plan.priceYearly;
       const d = await paddleApi(p.env, p.apiKey, "/prices", {
         method: "POST",

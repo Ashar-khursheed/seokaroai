@@ -30,14 +30,14 @@ function fromEnv(): Integrations {
   return {
     paddle: {
       env: e.PADDLE_ENV === "sandbox" ? "sandbox" : "production",
-      apiKey: e.PADDLE_API_KEY || "",
-      clientToken: e.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || e.PADDLE_CLIENT_TOKEN || "",
-      webhookSecret: e.PADDLE_WEBHOOK_SECRET || "",
+      apiKey: (e.PADDLE_API_KEY || "").trim(),
+      clientToken: (e.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || e.PADDLE_CLIENT_TOKEN || "").trim(),
+      webhookSecret: (e.PADDLE_WEBHOOK_SECRET || "").trim(),
       webhookId: "",
       prices: {
-        starter_monthly: e.PADDLE_PRICE_STARTER_MONTHLY || "", starter_yearly: e.PADDLE_PRICE_STARTER_YEARLY || "",
-        pro_monthly: e.PADDLE_PRICE_PRO_MONTHLY || "", pro_yearly: e.PADDLE_PRICE_PRO_YEARLY || "",
-        agency_monthly: e.PADDLE_PRICE_AGENCY_MONTHLY || "", agency_yearly: e.PADDLE_PRICE_AGENCY_YEARLY || "",
+        starter_monthly: (e.PADDLE_PRICE_STARTER_MONTHLY || "").trim(), starter_yearly: (e.PADDLE_PRICE_STARTER_YEARLY || "").trim(),
+        pro_monthly: (e.PADDLE_PRICE_PRO_MONTHLY || "").trim(), pro_yearly: (e.PADDLE_PRICE_PRO_YEARLY || "").trim(),
+        agency_monthly: (e.PADDLE_PRICE_AGENCY_MONTHLY || "").trim(), agency_yearly: (e.PADDLE_PRICE_AGENCY_YEARLY || "").trim(),
       },
       products: {},
     },
