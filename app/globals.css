@@ -207,3 +207,46 @@ body { font-feature-settings: "ss01", "cv11"; }
 .progress-glow { box-shadow: 0 0 14px #1f86ff; }
 @keyframes spin-border { to { --spin: 360deg; } }
 @keyframes card-breathe { 50% { opacity: .45; } }
+
+/* ------------------------------------------------------------------ responsive foundation */
+html, body { overflow-x: clip; max-width: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { -webkit-tap-highlight-color: transparent; }
+img, video, svg, canvas { max-width: 100%; }
+img, video { height: auto; }
+pre { max-width: 100%; }
+
+/* Horizontal scroll container for wide tables */
+.table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: thin; }
+.table-wrap > table { min-width: 100%; }
+.table-wrap th, .table-wrap td { white-space: nowrap; }
+.table-wrap td.wrap, .table-wrap th.wrap { white-space: normal; }
+
+/* Hide scrollbar but keep scrolling (for horizontal nav strips) */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Mobile drawer */
+.drawer-backdrop { position: fixed; inset: 0; z-index: 60; background: rgb(0 0 0 / .45); backdrop-filter: blur(4px); animation: fade-in .2s ease both; }
+.drawer-panel {
+  position: fixed; top: 0; bottom: 0; right: 0; z-index: 61; width: min(88vw, 340px); display: flex; flex-direction: column;
+  background: var(--bg-elev); border-left: 1px solid var(--line); box-shadow: -20px 0 60px -20px rgb(0 0 0 / .45);
+  padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+  animation: drawer-in .32s var(--ease-out-expo) both;
+}
+@keyframes drawer-in { from { transform: translateX(100%); } to { transform: none; } }
+
+@media (max-width: 639px) {
+  /* 16px inputs stop iOS Safari from zooming on focus */
+  .input, select.input, textarea.input { font-size: 16px; }
+  .btn { min-height: 40px; }
+  .md { font-size: 15px; }
+  .md h1 { font-size: 1.4rem; }
+  .md h2 { font-size: 1.2rem; }
+  .md pre { font-size: 12px; padding: 12px; }
+  .panel { border-radius: 12px; }
+}
+
+@media (hover: none) {
+  .card-hover:hover { transform: none; }
+}

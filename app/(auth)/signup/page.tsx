@@ -14,7 +14,7 @@ export default async function Signup({ searchParams }: { searchParams: Promise<{
   const chosen = plan && plan !== "free" ? getPlan(plan) : null;
   return (
     <div>
-      <h1 className="text-[28px] font-semibold tracking-[-0.03em]">Create your account</h1>
+      <h1 className="break-words text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-[28px]">Create your account</h1>
       <p className="muted mt-1 text-sm">{chosen ? `Start with the ${chosen.name} plan. You choose billing on the next step.` : "Free plan, no credit card. Upgrade anytime."}</p>
       <ActionForm action={signup} className="mt-6 space-y-4">
         <input type="hidden" name="plan" value={plan ?? ""} />
@@ -25,8 +25,8 @@ export default async function Signup({ searchParams }: { searchParams: Promise<{
           <input name="password" type="password" required minLength={10} autoComplete="new-password" className="input" />
           <span className="muted mt-1 block text-xs">At least 10 characters, with letters and a number.</span>
         </label>
-        <label className="flex items-start gap-2 text-sm">
-          <input type="checkbox" name="terms" required className="mt-1" />
+        <label className="flex items-start gap-2.5 text-sm">
+          <input type="checkbox" name="terms" required className="mt-1 h-4 w-4 shrink-0" />
           <span>I agree to the <Link href="/legal/terms" className="text-brand-500 underline">Terms</Link> and <Link href="/legal/privacy" className="text-brand-500 underline">Privacy Policy</Link>.</span>
         </label>
         <SubmitButton className="btn btn-brand w-full justify-center py-3" pendingText="Creating account…">Create account</SubmitButton>

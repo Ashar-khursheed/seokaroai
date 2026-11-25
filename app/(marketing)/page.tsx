@@ -36,40 +36,40 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <div className="grid-bg pointer-events-none absolute inset-0" />
         <div className="glow-top pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-20 sm:px-6 lg:pt-28">
+        <div className="relative mx-auto max-w-6xl px-4 pb-14 pt-14 sm:px-6 sm:pb-20 sm:pt-20 lg:pt-28">
           <div className="mx-auto max-w-3xl text-center">
-            <Link href="/features/seo-auto-fix" className="chip animate-fade-up hover:border-[var(--line-strong)]">
+            <Link href="/features/seo-auto-fix" className="chip animate-fade-up max-w-full flex-wrap justify-center text-center hover:border-[var(--line-strong)]">
               <span className="rounded-full bg-brand-500 px-1.5 text-[10px] font-semibold text-white">NEW</span>
               AI Auto-Fix for WordPress, Shopify and GitHub <Icon name="ArrowRight" size={13} />
             </Link>
-            <h1 className="text-gradient animate-fade-up mt-7 text-[2.6rem] font-semibold leading-[1.04] tracking-[-0.045em] sm:text-6xl lg:text-[4.4rem]" style={{ animationDelay: "80ms" }}>
+            <h1 className="text-gradient animate-fade-up mt-7 break-words text-[2.1rem] min-[400px]:text-[2.6rem] font-semibold leading-[1.04] tracking-[-0.045em] sm:text-6xl lg:text-[4.4rem]" style={{ animationDelay: "80ms" }}>
               SEO that finds the problem, proves it, and fixes it.
             </h1>
-            <p className="muted animate-fade-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed" style={{ animationDelay: "160ms" }}>
+            <p className="muted animate-fade-up mx-auto mt-6 max-w-2xl text-base leading-relaxed sm:text-lg" style={{ animationDelay: "160ms" }}>
               A team of AI agents audits your site, measures you against the top 3 results for every keyword, and ships the fixes to your CMS or codebase, with your approval at every step.
             </p>
-            <div className="animate-fade-up mt-9 flex flex-wrap justify-center gap-3" style={{ animationDelay: "240ms" }}>
-              <Link href="/signup" className="btn btn-brand px-6 py-3 text-[15px]">Audit my website free <Icon name="ArrowRight" size={16} /></Link>
-              <Link href="/features/keyword-battle" className="btn px-6 py-3 text-[15px]">See how it compares pages</Link>
+            <div className="animate-fade-up mt-9 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap" style={{ animationDelay: "240ms" }}>
+              <Link href="/signup" className="btn btn-brand w-full justify-center px-6 py-3 text-[15px] sm:w-auto">Audit my website free <Icon name="ArrowRight" size={16} /></Link>
+              <Link href="/features/keyword-battle" className="btn w-full justify-center px-6 py-3 text-[15px] sm:w-auto">See how it compares pages</Link>
             </div>
             <p className="muted animate-fade-up mt-5 text-[13px]" style={{ animationDelay: "320ms" }}>Free plan · no credit card · cancel anytime</p>
           </div>
 
-          <Reveal className="mx-auto mt-16 grid max-w-5xl gap-4 lg:grid-cols-[1.25fr_1fr]">
+          <Reveal className="mx-auto mt-12 grid min-w-0 max-w-full gap-4 sm:mt-16 lg:max-w-5xl lg:grid-cols-[1.25fr_1fr]">
             <AgentConsole />
-            <div className="panel flex flex-col p-5">
+            <div className="panel flex min-w-0 flex-col overflow-hidden p-4 sm:p-5">
               <div className="muted text-[12px]">Example report · yourbrand.com</div>
-              <div className="mt-3 flex items-center gap-5">
-                <svg width="104" height="104" viewBox="0 0 100 100" aria-hidden className="shrink-0">
+              <div className="mt-3 flex items-center gap-3 sm:gap-5">
+                <svg width="104" height="104" viewBox="0 0 100 100" aria-hidden className="h-20 w-20 shrink-0 sm:h-[104px] sm:w-[104px]">
                   <circle cx="50" cy="50" r="42" fill="none" stroke="var(--panel2)" strokeWidth="8" />
                   <circle cx="50" cy="50" r="42" fill="none" stroke="url(#hg)" strokeWidth="8" strokeLinecap="round" className="ring-anim"
                     style={{ ["--ring-len" as string]: "264" }} strokeDasharray="264" strokeDashoffset={264 - 0.61 * 264} transform="rotate(-90 50 50)" />
                   <defs><linearGradient id="hg"><stop offset="0" stopColor="#1F86FF" /><stop offset="1" stopColor="#14B8A6" /></linearGradient></defs>
                   <text x="50" y="57" textAnchor="middle" fontSize="26" fontWeight="600" fill="currentColor">61</text>
                 </svg>
-                <div className="flex-1 space-y-2.5">
+                <div className="min-w-0 flex-1 space-y-2.5">
                   {[["Technical", 72], ["Content", 54], ["On-page", 68], ["Schema", 41], ["AI search", 63]].map(([l, s], i) => (
-                    <div key={l as string} className="grid grid-cols-[70px_1fr_24px] items-center gap-2 text-[12px]">
+                    <div key={l as string} className="grid grid-cols-[62px_1fr_22px] sm:grid-cols-[70px_1fr_24px] items-center gap-2 text-[12px]">
                       <span className="muted">{l}</span>
                       <span className="h-1.5 overflow-hidden rounded-full bg-[var(--panel2)]"><span className="block h-full origin-left rounded-full bg-gradient-to-r from-brand-500 to-teal-400 animate-fade-up" style={{ width: `${s}%`, animationDelay: `${300 + i * 90}ms` }} /></span>
                       <span className="text-right tabular-nums">{s}</span>
@@ -80,7 +80,7 @@ export default function Home() {
               <div className="mt-5 space-y-2 text-[12.5px]">
                 {[["crit", "17 landing pages have no internal links"], ["high", "#1 result answers pricing, setup and FAQs"], ["low", "Pull request ready: sitemap + canonicals"]].map(([t, x]) => (
                   <div key={x} className="flex items-center gap-2.5 rounded-lg border line px-3 py-2">
-                    <span className={`h-1.5 w-1.5 rounded-full ${t === "crit" ? "bg-crit" : t === "high" ? "bg-high" : "bg-low"}`} />{x}
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${t === "crit" ? "bg-crit" : t === "high" ? "bg-high" : "bg-low"}`} />{x}
                   </div>
                 ))}
               </div>
@@ -90,8 +90,8 @@ export default function Home() {
       </section>
 
       {/* Marquee of checks */}
-      <section className="border-y line py-5" aria-label="What we check">
-        <div className="overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
+      <section className="overflow-hidden border-y line py-5" aria-label="What we check">
+        <div className="max-w-full overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
           <div className="marquee gap-3">
             {[...CHECKS, ...CHECKS].map((c, i) => <span key={i} className="chip mx-1.5 shrink-0"><Icon name="Check" size={12} className="text-low" />{c}</span>)}
           </div>
@@ -99,30 +99,30 @@ export default function Home() {
       </section>
 
       {/* Numbers */}
-      <section className="mx-auto mt-24 grid max-w-6xl grid-cols-2 gap-px overflow-hidden rounded-2xl border line bg-[var(--line)] px-0 sm:mx-6 md:grid-cols-4 lg:mx-auto">
+      <section className="mx-4 mt-16 grid max-w-6xl grid-cols-2 gap-px overflow-hidden rounded-2xl border line bg-[var(--line)] px-0 sm:mx-6 sm:mt-24 md:grid-cols-4 lg:mx-auto">
         {[[12, "+", "specialist agents in a deep audit"], [47, "", "on-page checks on every page"], [3, "", "competitors measured per keyword"], [100, "", "Google positions tracked daily"]].map(([n, s, l]) => (
-          <div key={l as string} className="bg-[var(--bg)] p-7">
-            <div className="text-4xl font-semibold tracking-tight"><CountUp to={n as number} suffix={s as string} /></div>
+          <div key={l as string} className="bg-[var(--bg)] p-4 sm:p-7">
+            <div className="text-3xl sm:text-4xl font-semibold tracking-tight"><CountUp to={n as number} suffix={s as string} /></div>
             <div className="muted mt-2 text-[13px]">{l}</div>
           </div>
         ))}
       </section>
 
       {/* Bento features */}
-      <section className="mx-auto mt-32 max-w-6xl px-4 sm:px-6">
+      <section className="mx-auto mt-20 sm:mt-32 max-w-6xl px-4 sm:px-6">
         <Reveal><SectionHead eyebrow="Platform" title="Everything an SEO team does, run by agents you can supervise." text="From the first crawl to the merged pull request, every step is measured, explained and reversible." /></Reveal>
-        <div className="mt-12 grid gap-4 md:grid-cols-6">
-          <Reveal className="md:col-span-4 md:row-span-2">
-            <Spotlight className="panel card-hover h-full p-8">
+        <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-2 md:grid-cols-6">
+          <Reveal className="sm:col-span-2 md:col-span-4 md:row-span-2">
+            <Spotlight className="panel card-hover h-full p-5 sm:p-8">
               <Icon name={main.icon} size={22} className="text-brand-500" />
-              <h3 className="mt-5 text-2xl font-semibold tracking-tight">{main.h1}</h3>
+              <h3 className="mt-5 text-xl sm:text-2xl font-semibold tracking-tight">{main.h1}</h3>
               <p className="muted mt-3 max-w-xl leading-relaxed">{main.intro}</p>
               <ul className="mt-6 grid gap-3 sm:grid-cols-2">{main.bullets.map((b) => <li key={b} className="flex gap-2.5 text-[14px]"><Icon name="Check" size={16} className="mt-0.5 shrink-0 text-low" />{b}</li>)}</ul>
               <Link href={`/features/${main.slug}`} className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-brand-500">Learn more <Icon name="ArrowRight" size={14} /></Link>
             </Spotlight>
           </Reveal>
           {rest.map((f, i) => (
-            <Reveal key={f.slug} delay={i * 60} className="md:col-span-2">
+            <Reveal key={f.slug} delay={i * 60} className="sm:col-span-1 md:col-span-2">
               <Spotlight className="panel card-hover h-full">
                 <Link href={`/features/${f.slug}`} className="block h-full p-6">
                   <Icon name={f.icon} size={20} className="text-brand-500" />
@@ -136,8 +136,8 @@ export default function Home() {
       </section>
 
       {/* Keyword battle */}
-      <section className="mx-auto mt-32 max-w-6xl px-4 sm:px-6">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+      <section className="mx-auto mt-20 max-w-6xl px-4 sm:mt-32 sm:px-6">
+        <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
           <Reveal>
             <SectionHead eyebrow="Keyword Battle" title="Stop guessing why competitors outrank you." text="Pick a keyword and your page. We measure the top 3 results and your page the same way, then every recommendation shows what a ranking competitor does and what you have today." />
             <ul className="mt-8 space-y-3.5">
@@ -146,10 +146,10 @@ export default function Home() {
               ))}
             </ul>
           </Reveal>
-          <Reveal delay={120}>
-            <div className="panel overflow-x-auto p-5">
+          <Reveal delay={120} className="min-w-0">
+            <div className="panel max-w-full overflow-x-auto p-4 sm:p-5">
               <div className="muted mb-3 text-[12px]">Example comparison</div>
-              <table className="w-full min-w-[440px] text-[13px]">
+              <div className="table-wrap"><table className="w-full min-w-[440px] text-[13px]">
                 <thead><tr className="muted text-left text-[12px]"><th className="p-2 font-medium">Signal</th><th className="p-2 font-medium text-[var(--ink)]">You</th><th className="p-2 font-medium">#1</th><th className="p-2 font-medium">#2</th><th className="p-2 font-medium">#3</th></tr></thead>
                 <tbody>
                   {[["Main content words", "420", "2,100", "1,800", "1,500", true], ["FAQ section", "No", "Yes", "Yes", "No", true], ["Comparison table", "No", "Yes", "Yes", "Yes", true], ["Product schema", "Yes", "Yes", "No", "Yes", false], ["Server response", "0.2s", "0.6s", "0.9s", "0.5s", false]].map(([s, a, b, c, d, gap]) => (
@@ -160,7 +160,7 @@ export default function Home() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
               <div className="mt-4 rounded-xl border line p-4 text-[13px]">
                 <div className="flex items-center gap-2 font-medium"><span className="h-1.5 w-1.5 rounded-full bg-high" />Add a 6-question FAQ under the pricing section</div>
                 <div className="muted mt-1.5">Evidence: #1 and #2 answer setup time, warranty and delivery in an FAQ; your page answers none.</div>
@@ -171,9 +171,9 @@ export default function Home() {
       </section>
 
       {/* Auto-fix */}
-      <section className="mx-auto mt-32 max-w-6xl px-4 sm:px-6">
+      <section className="mx-auto mt-20 sm:mt-32 max-w-6xl px-4 sm:px-6">
         <Reveal><SectionHead center eyebrow="AI Auto-Fix" title="From finding to shipped fix, without the ticket queue." text="Connect your platform once. Every fix is shown side by side before it changes anything." /></Reveal>
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-2 md:grid-cols-3">
           {[
             { icon: "Globe", t: "WordPress", d: "Titles, excerpts and image alt text through the REST API with an Application Password." },
             { icon: "ShoppingBag", t: "Shopify", d: "Product titles, SEO titles, meta descriptions and image alt text through the Admin API." },
@@ -190,19 +190,19 @@ export default function Home() {
         </div>
         <Reveal>
           <div className="panel mt-4 overflow-hidden font-mono text-[12.5px]">
-            <div className="muted border-b line px-4 py-2.5 text-[11px]">Proposed change · product “Commercial Coffee Grinder” · seo_description</div>
-            <div className="bg-crit/5 px-4 py-2 text-crit">- Buy now. Best price. Free shipping.</div>
-            <div className="bg-low/5 px-4 py-2 text-low">+ Commercial coffee grinder with 64 mm flat burrs and 1.2 kg hopper. Ships across the UAE in 48 hours with a 2-year warranty.</div>
+            <div className="muted break-words border-b line px-4 py-2.5 text-[11px]">Proposed change · product “Commercial Coffee Grinder” · seo_description</div>
+            <div className="break-words bg-crit/5 px-4 py-2 text-crit">- Buy now. Best price. Free shipping.</div>
+            <div className="break-words bg-low/5 px-4 py-2 text-low">+ Commercial coffee grinder with 64 mm flat burrs and 1.2 kg hopper. Ships across the UAE in 48 hours with a 2-year warranty.</div>
           </div>
         </Reveal>
       </section>
 
       {/* Steps */}
-      <section className="mx-auto mt-32 max-w-6xl px-4 sm:px-6">
+      <section className="mx-auto mt-20 max-w-6xl px-4 sm:mt-32 sm:px-6">
         <Reveal><SectionHead eyebrow="How it works" title="Four steps, one loop." /></Reveal>
-        <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border line bg-[var(--line)] md:grid-cols-4">
+        <div className="mt-8 grid gap-px overflow-hidden rounded-2xl border line bg-[var(--line)] sm:mt-12 sm:grid-cols-2 md:grid-cols-4">
           {STEPS.map((s, i) => (
-            <Reveal key={s.t} delay={i * 70} className="bg-[var(--bg)] p-7">
+            <Reveal key={s.t} delay={i * 70} className="bg-[var(--bg)] p-5 sm:p-7">
               <div className="muted font-mono text-[12px]">0{i + 1}</div>
               <Icon name={s.icon} size={20} className="mt-5 text-brand-500" />
               <h3 className="mt-4 font-semibold">{s.t}</h3>
@@ -213,9 +213,9 @@ export default function Home() {
       </section>
 
       {/* Pricing teaser */}
-      <section className="mx-auto mt-32 max-w-6xl px-4 sm:px-6">
+      <section className="mx-auto mt-20 max-w-6xl px-4 sm:mt-32 sm:px-6">
         <Reveal><SectionHead center eyebrow="Pricing" title="Start free. Grow when it pays." /></Reveal>
-        <div className="mt-12 grid gap-4 md:grid-cols-4">
+        <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-2 md:grid-cols-4">
           {(["free", ...PAID_PLANS] as const).map((c, i) => {
             const p = PLANS[c];
             return (
@@ -233,7 +233,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section className="mx-auto mt-32 max-w-3xl px-4 sm:px-6">
+      <section className="mx-auto mt-20 sm:mt-32 max-w-3xl px-4 sm:px-6">
         <Reveal><SectionHead center title="Questions, answered" /></Reveal>
         <div className="mt-10"><FaqList faqs={HOME_FAQS} /></div>
       </section>

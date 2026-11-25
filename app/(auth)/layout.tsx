@@ -11,10 +11,10 @@ const POINTS = [
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.05fr]">
-      <div className="flex flex-col px-6 py-6 sm:px-10">
-        <Link href="/" aria-label="SEOKaroAI home"><Logo size={26} /></Link>
-        <main className="flex flex-1 items-center justify-center py-12">
-          <div className="animate-fade-up w-full max-w-[400px]">{children}</div>
+      <div className="flex min-w-0 flex-col px-4 py-5 sm:px-10 sm:py-6">
+        <Link href="/" aria-label="SEOKaroAI home" className="self-start"><Logo size={26} /></Link>
+        <main className="flex flex-1 items-center justify-center py-8 sm:py-12">
+          <div className="animate-fade-up w-full min-w-0 max-w-[420px] rounded-2xl border line bg-[var(--panel)] p-5 sm:p-8 lg:max-w-[400px] lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">{children}</div>
         </main>
         <footer className="muted text-[12px]">
           <Link href="/legal/privacy" className="hover:text-[var(--ink)]">Privacy</Link> · <Link href="/legal/terms" className="hover:text-[var(--ink)]">Terms</Link>

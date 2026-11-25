@@ -44,20 +44,20 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           ],
         },
       ]} />
-      <article className="mx-auto max-w-6xl px-4 pt-12 sm:px-6">
+      <article className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
         <nav className="muted text-sm" aria-label="Breadcrumb"><Link href="/">Home</Link> / <Link href="/blog">Blog</Link></nav>
-        <header className="mt-6 max-w-3xl">
-          <h1 className="text-4xl font-semibold tracking-[-0.02em] leading-tight tracking-tight sm:text-[2.7rem]">{p.title}</h1>
-          <p className="muted mt-4 text-lg">{p.excerpt}</p>
+        <header className="mt-5 max-w-3xl sm:mt-6">
+          <h1 className="break-words text-[1.85rem] font-semibold leading-tight tracking-[-0.02em] sm:text-[2.7rem]">{p.title}</h1>
+          <p className="muted mt-4 text-base sm:text-lg">{p.excerpt}</p>
           <div className="muted mt-4 text-sm">
             By {p.authorName} · <time dateTime={p.publishedAt?.toISOString()}>{p.publishedAt?.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</time>
             {updated && <> · Updated {p.updatedAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</>}
             {" "}· {readingMinutes(p.content)} min read
           </div>
         </header>
-        {p.coverImage && <img src={p.coverImage} alt="" className="mt-8 max-h-[420px] w-full rounded-2xl object-cover" />}
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_240px]">
-          <div className="md max-w-3xl !text-[17px]" dangerouslySetInnerHTML={{ __html: html }} />
+        {p.coverImage && <img src={p.coverImage} alt="" className="mt-6 max-h-[260px] w-full rounded-xl object-cover sm:mt-8 sm:max-h-[420px] sm:rounded-2xl" />}
+        <div className="mt-8 grid min-w-0 gap-8 sm:mt-10 sm:gap-10 lg:grid-cols-[1fr_240px]">
+          <div className="md min-w-0 max-w-3xl !text-[15.5px] sm:!text-[17px]" dangerouslySetInnerHTML={{ __html: html }} />
           {headings.length > 2 && (
             <aside className="hidden lg:block">
               <div className="sticky top-24 text-sm">
@@ -69,9 +69,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         </div>
       </article>
       {more.length > 0 && (
-        <section className="mx-auto mt-16 max-w-6xl px-4 sm:px-6">
+        <section className="mx-auto mt-12 max-w-6xl px-4 sm:mt-16 sm:px-6">
           <h2 className="text-xl font-bold">Keep reading</h2>
-          <div className="mt-5 grid gap-5 md:grid-cols-3">
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3">
             {more.map((m) => <Link key={m.id} href={`/blog/${m.slug}`} className="panel p-5 hover:border-brand-500"><div className="font-semibold">{m.title}</div><p className="muted mt-2 text-sm">{m.excerpt}</p></Link>)}
           </div>
         </section>

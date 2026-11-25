@@ -45,16 +45,16 @@ export default function Pricing() {
           priceSpecification: { "@type": "UnitPriceSpecification", price: String(PLANS[c].priceMonthly), priceCurrency: "USD", billingDuration: "P1M" },
         })),
       }} />
-      <section className="mx-auto max-w-6xl px-4 pt-16 text-center sm:px-6">
-        <h1 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Pricing that pays for itself</h1>
-        <p className="muted mx-auto mt-4 max-w-2xl text-lg">Start free on one website. Upgrade for AI deep audits, keyword battles, daily rank tracking and more websites. Yearly billing gives you 2 months free.</p>
+      <section className="mx-auto max-w-6xl px-4 pt-10 text-center sm:px-6 sm:pt-16">
+        <h1 className="break-words text-[2.1rem] font-semibold leading-tight tracking-[-0.03em] sm:text-5xl">Pricing that pays for itself</h1>
+        <p className="muted mx-auto mt-4 max-w-2xl text-base sm:text-lg">Start free on one website. Upgrade for AI deep audits, keyword battles, daily rank tracking and more websites. Yearly billing gives you 2 months free.</p>
       </section>
 
-      <section className="mx-auto mt-12 grid max-w-6xl gap-5 px-4 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
+      <section className="mx-auto mt-10 grid sm:mt-12 max-w-6xl gap-5 px-4 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
         {codes.map((c) => {
           const p = PLANS[c];
           return (
-            <div key={c} className={`panel relative flex flex-col p-6 ${p.popular ? "ring-2 ring-brand-500" : ""}`}>
+            <div key={c} className={`panel relative flex flex-col p-5 sm:p-6 ${p.popular ? "ring-2 ring-brand-500" : ""}`}>
               {p.popular && <span className="absolute -top-3 left-6 rounded-full bg-brand-600 px-3 py-0.5 text-xs font-bold text-white">Most popular</span>}
               <h2 className="text-lg font-bold">{p.name}</h2>
               <p className="muted mt-1 min-h-[40px] text-sm">{p.tagline}</p>
@@ -69,20 +69,20 @@ export default function Pricing() {
         })}
       </section>
 
-      <section className="mx-auto mt-16 max-w-6xl px-4 sm:px-6">
-        <h2 className="mb-6 text-2xl font-semibold tracking-[-0.02em]">Compare plans</h2>
-        <div className="panel overflow-x-auto">
+      <section className="mx-auto mt-12 max-w-6xl px-4 sm:mt-16 sm:px-6">
+        <h2 className="mb-5 text-xl font-semibold tracking-[-0.02em] sm:mb-6 sm:text-2xl">Compare plans</h2>
+        <div className="panel table-wrap overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
-            <thead><tr className="border-b line text-left"><th className="p-4">Feature</th>{codes.map((c) => <th key={c} className="p-4">{PLANS[c].name}</th>)}</tr></thead>
+            <thead><tr className="border-b line text-left"><th className="p-3 sm:p-4">Feature</th>{codes.map((c) => <th key={c} className="p-3 sm:p-4">{PLANS[c].name}</th>)}</tr></thead>
             <tbody>{ROWS.map(([label, f]) => (
-              <tr key={label} className="border-b line last:border-0"><td className="p-4 font-medium">{label}</td>{codes.map((c) => <td key={c} className="p-4">{f(c)}</td>)}</tr>
+              <tr key={label} className="border-b line last:border-0"><td className="p-3 font-medium sm:p-4">{label}</td>{codes.map((c) => <td key={c} className="p-3 sm:p-4">{f(c)}</td>)}</tr>
             ))}</tbody>
           </table>
         </div>
       </section>
 
-      <section className="mx-auto mt-16 max-w-3xl px-4 sm:px-6">
-        <h2 className="mb-6 text-center text-2xl font-semibold tracking-[-0.02em]">Billing questions</h2>
+      <section className="mx-auto mt-12 max-w-3xl px-4 sm:mt-16 sm:px-6">
+        <h2 className="mb-5 text-center text-xl font-semibold tracking-[-0.02em] sm:mb-6 sm:text-2xl">Billing questions</h2>
         <FaqList faqs={FAQS} />
       </section>
       <CtaBand title="Start with a free audit today" />

@@ -48,25 +48,25 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
     <div className="space-y-6">
       <AutoRefresh active={running} ms={12000} />
       {sp.error && <div className="rounded-xl border border-crit/30 bg-crit/10 px-4 py-3 text-[14px]">{sp.error}</div>}
-      {sp.new && <div className="flex items-center gap-2 rounded-xl border border-low/30 bg-low/10 px-4 py-3 text-[14px]"><Icon name="CircleCheck" size={16} className="text-low" />Website added. The first site audit is running; results appear here in a couple of minutes.</div>}
+      {sp.new && <div className="flex items-start gap-2 rounded-xl border border-low/30 bg-low/10 px-4 py-3 text-[14px] sm:items-center"><Icon name="CircleCheck" size={16} className="mt-0.5 shrink-0 text-low sm:mt-0" /><span>Website added. The first site audit is running; results appear here in a couple of minutes.</span></div>}
 
-      <section className="flex flex-wrap items-center gap-6">
+      <section className="flex flex-wrap items-center gap-4 sm:gap-6">
         <ScoreRing score={p.lastScore} size={96} />
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[28px] font-semibold tracking-[-0.03em]">{p.name}</h1>
-          <a href={p.url} target="_blank" rel="noopener noreferrer" className="muted inline-flex items-center gap-1 text-[14px] hover:text-[var(--ink)]">{p.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}<Icon name="ArrowUpRight" size={13} /></a>
+          <h1 className="truncate text-[22px] sm:text-[28px] font-semibold tracking-[-0.03em]">{p.name}</h1>
+          <a href={p.url} target="_blank" rel="noopener noreferrer" className="muted inline-flex max-w-full items-center gap-1 break-all text-[14px] hover:text-[var(--ink)]">{p.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}<Icon name="ArrowUpRight" size={13} /></a>
           <div className="muted mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12.5px]">
             <span>{p.country} · {p.language}</span><span>Audited {timeAgo(p.lastAuditAt)}</span><span>Auto audit {p.autoAudit}</span><span>Rank checks {p.rankFrequency}</span>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           <form action={startQuickAudit}><input type="hidden" name="projectId" value={p.id} /><SubmitButton className="btn" pendingText="Starting…"><Icon name="ScanSearch" size={15} />Run site audit</SubmitButton></form>
           <Link href={`/app/battles/new?projectId=${p.id}`} className="btn"><Icon name="Swords" size={15} />Keyword battle</Link>
           <Link href={`/app/projects/${p.id}?tab=overview#deep`} className="btn btn-primary"><Icon name="BrainCircuit" size={15} />AI deep audit</Link>
         </div>
       </section>
 
-      <nav className="flex gap-1 overflow-x-auto border-b line" aria-label="Website sections">
+      <nav className="no-scrollbar flex gap-1 overflow-x-auto whitespace-nowrap border-b line" aria-label="Website sections">
         {tabs.map(([t, l, ic]) => (
           <Link key={t} href={`/app/projects/${p.id}?tab=${t}`}
             className={`-mb-px flex shrink-0 items-center gap-2 border-b-2 px-3 py-2.5 text-[13.5px] transition ${tab === t ? "border-[var(--ink)] font-medium" : "muted border-transparent hover:text-[var(--ink)]"}`}>
@@ -92,7 +92,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
               <Card title={`Latest ${KIND_LABEL[latestAudit.kind].toLowerCase()} · ${timeAgo(latestAudit.finishedAt)}`} action={<Link href={`/app/runs/${encodeURIComponent(latestAudit.id)}`} className="text-[12.5px] font-medium text-brand-500">Open report</Link>}>
                 <div className="space-y-3">
                   {(latestSummary.categories ?? []).map((c) => (
-                    <div key={c.label} className="grid grid-cols-[150px_1fr_32px] items-center gap-3 text-[13.5px]">
+                    <div key={c.label} className="grid grid-cols-[minmax(100px,130px)_1fr_32px] items-center gap-3 text-[13.5px] sm:grid-cols-[150px_1fr_32px]">
                       <span className="truncate">{c.label}</span>
                       <span className="h-1.5 overflow-hidden rounded-full bg-[var(--panel2)]"><span className="block h-full rounded-full bg-gradient-to-r from-brand-500 to-teal-400" style={{ width: `${c.score ?? 0}%` }} /></span>
                       <b className="text-right tabular-nums">{c.score ?? "–"}</b>
@@ -101,11 +101,11 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                 </div>
               </Card>
               <Card title="Top issues" action={<Link href={`/app/projects/${p.id}?tab=fix`} className="text-[12.5px] font-medium text-brand-500">Fix them</Link>}>
-                <ul className="space-y-2">{(latestSummary.top_issues ?? []).map((i, k) => <li key={k} className="flex items-start gap-2.5 text-[14px]">{i.severity && <SevBadge s={i.severity} />}<span>{i.title}</span></li>)}</ul>
+                <ul className="space-y-2">{(latestSummary.top_issues ?? []).map((i, k) => <li key={k} className="flex items-start gap-2.5 text-[14px]">{i.severity && <span className="shrink-0"><SevBadge s={i.severity} /></span>}<span className="min-w-0 break-words">{i.title}</span></li>)}</ul>
               </Card>
             </div>
           )}
-          <section id="deep" className="panel scroll-mt-20 p-6">
+          <section id="deep" className="panel scroll-mt-20 p-4 sm:p-6">
             <div className="flex items-center gap-2 font-semibold"><Icon name="BrainCircuit" size={18} className="text-brand-500" />AI deep audit</div>
             <p className="muted mt-1.5 text-[14px]">A team of specialist agents audits the site, analyses competitors and writes the flows you pick. 15 to 40 minutes. {plan.limits.deepAudits ? `${plan.limits.deepAudits} a month on your plan.` : "Not included in the Free plan."}</p>
             <div className="mt-4 flex flex-wrap gap-1.5">{AGENTS.filter((ag) => ag.id !== "orchestrator").map((ag) => <span key={ag.id} className="chip"><Icon name={ag.icon} size={12} className="text-brand-500" />{ag.name}</span>)}</div>
@@ -117,9 +117,9 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{AUDIT_FLOW_KEYS.map((f) => <label key={f} className="flex items-center gap-2 text-[13.5px]"><input type="checkbox" name="flows" value={f} defaultChecked className="accent-[#1f86ff]" />{FLOW_LABELS[f] ?? f}</label>)}</div>
                 </fieldset>
                 <Field label="Notes for the agents (optional)"><input name="notes" maxLength={2000} className="input" placeholder="e.g. we only sell B2B in the UAE" /></Field>
-                <SubmitButton className="btn btn-brand" pendingText="Starting…">Start AI deep audit</SubmitButton>
+                <SubmitButton className="btn btn-brand w-full sm:w-auto" pendingText="Starting…">Start AI deep audit</SubmitButton>
               </ActionForm>
-            ) : <Link href="/app/billing" className="btn btn-brand mt-5">Upgrade to unlock</Link>}
+            ) : <Link href="/app/billing" className="btn btn-brand mt-5 w-full sm:w-auto">Upgrade to unlock</Link>}
           </section>
         </>
       )}
@@ -132,7 +132,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
             {conns.length === 0 ? <p className="muted text-[14px]">Nothing connected yet. Connect your CMS or repository below so AI can turn audit findings into real changes. You review every change before it ships.</p> : (
               <div className="-mx-2">{conns.map((c) => (
                 <div key={c.id} className="flex flex-wrap items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-[var(--panel2)]">
-                  <span className="grid h-9 w-9 place-items-center rounded-lg border line text-brand-500"><Icon name={CONN_ICON[c.kind] ?? "Plug"} size={16} /></span>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border line text-brand-500"><Icon name={CONN_ICON[c.kind] ?? "Plug"} size={16} /></span>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[14px] font-medium">{c.name}</div>
                     <div className={`truncate text-[12.5px] ${c.status === "ok" ? "text-low" : c.status === "error" ? "text-crit" : "muted"}`}>{c.status === "ok" ? `Connected · tested ${timeAgo(c.lastTestedAt)}` : c.lastError ?? "Not tested"}</div>
@@ -153,8 +153,8 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                   <Field label="Fix findings from"><select name="sourceRunId" className="input"><option value="">Latest audit</option>{runs.filter((r) => r.status === "done" && (r.kind === "quick" || r.kind === "deep")).map((r) => <option key={r.id} value={r.id}>{r.title} · {timeAgo(r.finishedAt)}</option>)}</select></Field>
                 </div>
                 <Field label="Instructions (optional)"><input name="instructions" maxLength={2000} className="input" placeholder="e.g. focus on product pages; keep the brand name at the end of titles" /></Field>
-                <div className="flex flex-wrap items-center gap-3">
-                  <SubmitButton className="btn btn-brand" pendingText="Starting…"><Icon name="WandSparkles" size={15} />Propose fixes</SubmitButton>
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                  <SubmitButton className="btn btn-brand w-full sm:w-auto" pendingText="Starting…"><Icon name="WandSparkles" size={15} />Propose fixes</SubmitButton>
                   <span className="muted text-[12.5px]">Nothing changes until you approve it. {plan.limits.fixes} auto-fixes a month on your plan.</span>
                 </div>
               </ActionForm>
@@ -176,10 +176,10 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
               { name: "branch", label: "Base branch (optional)", placeholder: "main" },
               { name: "secret", label: "Fine-grained token", placeholder: "github_pat_…", secret: true, hint: "This repository only · Contents and Pull requests: read and write" },
             ]} />
-            <section className="panel p-5 lg:col-span-2">
+            <section className="panel p-4 sm:p-5 lg:col-span-2">
               <div className="flex items-start gap-3">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border line text-brand-500"><Icon name="Folder" size={16} /></span>
-                <span className="flex-1"><span className="block font-medium">Computer folder</span><span className="muted mt-0.5 block text-[13px] leading-snug">{CONNECTOR_INFO.local.blurb}</span></span>
+                <span className="min-w-0 flex-1"><span className="block font-medium">Computer folder</span><span className="muted mt-0.5 block text-[13px] leading-snug">{CONNECTOR_INFO.local.blurb}</span></span>
               </div>
               <div className="mt-5"><LocalFolderStart projectId={p.id} audits={runs.filter((r) => r.status === "done" && (r.kind === "quick" || r.kind === "deep")).map((r) => ({ id: r.id, title: `${r.title} · ${timeAgo(r.finishedAt)}` }))} /></div>
             </section>
@@ -194,10 +194,10 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
         <Card title="Reports">
           {runs.length === 0 ? <p className="muted text-[14px]">No reports yet.</p> : (
             <div className="-mx-2">{runs.map((r) => (
-              <Link key={r.id} href={`/app/runs/${encodeURIComponent(r.id)}`} className="flex items-center gap-3.5 rounded-xl px-2 py-2.5 transition hover:bg-[var(--panel2)]">
+              <Link key={r.id} href={`/app/runs/${encodeURIComponent(r.id)}`} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-[var(--panel2)] sm:gap-3.5">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border line text-brand-500"><Icon name={KIND_ICON[r.kind] ?? "FileText"} size={16} /></span>
-                <div className="min-w-0 flex-1"><div className="truncate text-[14px] font-medium">{r.title}</div><div className="muted text-[12.5px]">{KIND_LABEL[r.kind]}{r.triggerType === "schedule" ? " · scheduled" : ""} · {timeAgo(r.createdAt)}</div></div>
-                {r.score != null && <b className="tabular-nums">{r.score}</b>}<StatusPill status={r.status} />
+                <div className="min-w-0 flex-1"><div className="truncate text-[14px] font-medium">{r.title}</div><div className="muted truncate text-[12.5px]">{KIND_LABEL[r.kind]}{r.triggerType === "schedule" ? " · scheduled" : ""} · {timeAgo(r.createdAt)}</div></div>
+                {r.score != null && <b className="shrink-0 tabular-nums">{r.score}</b>}<StatusPill status={r.status} />
               </Link>
             ))}</div>
           )}
@@ -238,11 +238,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function ConnectorForm({ projectId, kind, fields }: { projectId: number; kind: keyof typeof CONNECTOR_INFO; fields: { name: string; label: string; placeholder?: string; secret?: boolean; hint?: string }[] }) {
   const info = CONNECTOR_INFO[kind];
   return (
-    <details className="panel group p-5">
+    <details className="panel group p-4 sm:p-5">
       <summary className="flex cursor-pointer list-none items-start gap-3">
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border line text-brand-500"><Icon name={CONN_ICON[kind]} size={16} /></span>
-        <span className="flex-1"><span className="block font-medium">Connect {info.label}</span><span className="muted mt-0.5 block text-[13px] leading-snug">{info.blurb}</span></span>
-        <Icon name="Plus" size={16} className="muted mt-1 transition group-open:rotate-45" />
+        <span className="min-w-0 flex-1"><span className="block font-medium">Connect {info.label}</span><span className="muted mt-0.5 block text-[13px] leading-snug">{info.blurb}</span></span>
+        <Icon name="Plus" size={16} className="muted mt-1 shrink-0 transition group-open:rotate-45" />
       </summary>
       <ActionForm action={saveConnector} className="mt-5 space-y-3.5" resetOnOk>
         <input type="hidden" name="projectId" value={projectId} />
@@ -254,9 +254,9 @@ function ConnectorForm({ projectId, kind, fields }: { projectId: number; kind: k
             {f.hint && <span className="muted mt-1 block text-[12px]">{f.hint}</span>}
           </label>
         ))}
-        <div className="flex items-center gap-3">
-          <SubmitButton className="btn btn-primary" pendingText="Connecting…"><Icon name="Plug" size={15} />Connect and test</SubmitButton>
-          <span className="muted flex items-center gap-1.5 text-[12px]"><Icon name="Lock" size={12} />Encrypted at rest, never sent to AI</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Connecting…"><Icon name="Plug" size={15} />Connect and test</SubmitButton>
+          <span className="muted flex items-center gap-1.5 text-[12px]"><Icon name="Lock" size={12} className="shrink-0" />Encrypted at rest, never sent to AI</span>
         </div>
       </ActionForm>
     </details>
@@ -272,18 +272,18 @@ async function Rankings({ projectId, kws, limit, targetUrl }: { projectId: numbe
   }
   return (
     <div className="space-y-4">
-      {!(await rankTrackingAvailable()) && <div className="flex items-center gap-2 rounded-xl border border-high/30 bg-high/10 px-4 py-3 text-[14px]"><Icon name="TriangleAlert" size={16} className="text-high" />Live rank data is not switched on for this server yet. Keywords are saved and checked as soon as it is.</div>}
+      {!(await rankTrackingAvailable()) && <div className="flex items-start gap-2 rounded-xl border border-high/30 bg-high/10 px-4 py-3 text-[14px] sm:items-center"><Icon name="TriangleAlert" size={16} className="mt-0.5 shrink-0 text-high sm:mt-0" /><span>Live rank data is not switched on for this server yet. Keywords are saved and checked as soon as it is.</span></div>}
       <Card title="Add keywords">
         <ActionForm action={addKeywords} className="flex flex-col gap-3 sm:flex-row sm:items-start" resetOnOk>
           <input type="hidden" name="projectId" value={projectId} />
           <textarea name="keywords" rows={2} required className="input flex-1" placeholder="One keyword per line, or comma separated" />
-          <SubmitButton className="btn btn-primary" pendingText="Adding…"><Icon name="Plus" size={15} />Add</SubmitButton>
+          <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Adding…"><Icon name="Plus" size={15} />Add</SubmitButton>
         </ActionForm>
         <p className="muted mt-2 text-[12.5px]">{kws.length} tracked here · {limit} allowed across all websites on your plan.</p>
       </Card>
       <Card title="Keyword rankings">
         {kws.length === 0 ? <p className="muted text-[14px]">No keywords yet.</p> : (
-          <div className="overflow-x-auto">
+          <div className="table-wrap">
             <table className="w-full min-w-[860px] text-[14px]">
               <thead><tr className="muted border-b line text-left text-[12px]"><th className="py-2 font-medium">Keyword</th><th className="font-medium">Position</th><th className="font-medium">Change</th><th className="font-medium">Best</th><th className="font-medium">30 days</th><th className="font-medium">Ranking URL</th><th className="font-medium">#1 today</th><th></th></tr></thead>
               <tbody>{kws.map((k) => {

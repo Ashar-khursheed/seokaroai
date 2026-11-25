@@ -10,14 +10,14 @@ export default async function Reset({ searchParams }: { searchParams: Promise<{ 
   if (!token) {
     return (
       <div>
-        <h1 className="text-[28px] font-semibold tracking-[-0.03em]">Link missing</h1>
+        <h1 className="break-words text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-[28px]">Link missing</h1>
         <p className="muted mt-2">Open the link from your email, or <Link href="/forgot-password" className="text-brand-500">ask for a new one</Link>.</p>
       </div>
     );
   }
   return (
     <div>
-      <h1 className="text-[28px] font-semibold tracking-[-0.03em]">Choose a new password</h1>
+      <h1 className="break-words text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-[28px]">Choose a new password</h1>
       <p className="muted mt-1 text-sm">You will be signed out on every other device.</p>
       <ActionForm action={resetPassword} className="mt-6 space-y-4">
         <input type="hidden" name="token" value={token} />

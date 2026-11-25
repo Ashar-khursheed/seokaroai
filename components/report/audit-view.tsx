@@ -75,26 +75,26 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
       {v === "file" && file && <Card><FileView id={id} dir={dir} rel={file} /></Card>}
       {v === "team" && <AgentBoard runId={id} running={running} agents={boardAgents} doneFiles={doneFiles} />}
       {v === "log" && (
-        <Card title={<span className="flex items-center gap-3">Live activity {running && <CancelRunButton id={id} />}</span>}>
-          {run.error && <div className="mb-3 rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{run.error}</div>}
+        <Card title={<span className="flex flex-wrap items-center gap-3">Live activity {running && <CancelRunButton id={id} />}</span>}>
+          {run.error && <div className="mb-3 break-words rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{run.error}</div>}
           <LiveLog id={id} running={running} />
         </Card>
       )}
 
       {v === "overview" && (
         <>
-          <section className="panel flex flex-wrap items-center gap-6 p-6">
+          <section className="panel flex flex-col gap-4 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6 sm:p-6">
             <ScoreRing score={data?.summary?.health_score ?? run.score ?? null} size={130} />
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold uppercase tracking-wider text-brand-600">AI deep audit · SEO health score</div>
-              <h1 className="truncate text-2xl font-bold">{host}</h1>
+              <h1 className="truncate text-xl font-bold sm:text-2xl">{host}</h1>
               <div className="muted">{data?.summary?.business_type}</div>
-              <div className="muted mt-2 flex flex-wrap gap-3 text-xs">
+              <div className="muted mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
                 {run.finishedAt && <span>Finished {run.finishedAt.toLocaleString()}</span>}
                 <span>{findings.length} agent reports · {[...flowGroups.values()].flat().length} flow files · {shots.length} screenshots</span>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 print:hidden">
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto print:hidden">
               {pdf && <a className="btn btn-primary" href={fileUrl(id, pdf.path, true)}>Download PDF</a>}
               {htmlReport && <a className="btn" href={fileUrl(id, htmlReport.path)} target="_blank" rel="noopener">HTML report</a>}
               {running ? <CancelRunButton id={id} /> : <PrintButton />}
@@ -106,16 +106,16 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
             <div className="grid gap-5 xl:grid-cols-2">
               <Card title="Top issues">
                 <ul className="space-y-2">{(data.summary?.top_findings ?? []).map((f, i) => (
-                  <li key={i} className={`panel2 rounded-lg border-l-4 px-3 py-2 text-sm ${sevBorder(fsev(f))}`}>{fsev(f) && <span className="mr-2"><SevBadge s={fsev(f)} /></span>}{ftitle(f)}</li>
+                  <li key={i} className={`panel2 break-words rounded-lg border-l-4 px-3 py-2 text-sm ${sevBorder(fsev(f))}`}>{fsev(f) && <span className="mr-2"><SevBadge s={fsev(f)} /></span>}{ftitle(f)}</li>
                 ))}</ul>
               </Card>
-              <Card title="Quick wins"><ul className="list-disc space-y-1.5 pl-5 text-sm">{(data.summary?.quick_wins ?? []).map((w, i) => <li key={i}>{w}</li>)}</ul></Card>
+              <Card title="Quick wins"><ul className="list-disc space-y-1.5 break-words pl-5 text-sm">{(data.summary?.quick_wins ?? []).map((w, i) => <li key={i}>{w}</li>)}</ul></Card>
             </div>
           )}
           {data?.categories && (
             <Card title="Category scores">
               <div className="space-y-2">{data.categories.map((c, i) => (
-                <Link key={i} href={`${href(id, { view: "categories" })}#cat-${i}`} className="grid grid-cols-[minmax(120px,220px)_1fr_44px] items-center gap-3 text-sm hover:opacity-80">
+                <Link key={i} href={`${href(id, { view: "categories" })}#cat-${i}`} className="grid grid-cols-[minmax(100px,130px)_1fr_36px] items-center gap-3 text-sm hover:opacity-80 sm:grid-cols-[minmax(120px,220px)_1fr_44px]">
                   <span className="truncate">{c.name}</span>
                   <span className="panel2 h-3 overflow-hidden rounded-full"><span className="block h-full rounded-full" style={{ width: `${c.score ?? 0}%`, background: scoreColor(c.score) }} /></span>
                   <b style={{ color: scoreColor(c.score) }}>{c.score ?? "–"}</b>
@@ -127,15 +127,15 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
             <Card title="Agent reports">
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{findings.map((f) => {
                 const key = f.path.replace(/^findings\//, "").replace(/\.md$/, "");
-                return <Link key={f.path} href={href(id, { file: f.path })} className="panel2 rounded-xl border line p-3 hover:border-brand-500"><div className="font-semibold">{AGENT_LABEL[key] ?? key}</div><div className="muted text-xs">seo-{key} · {kb(f.size)}</div></Link>;
+                return <Link key={f.path} href={href(id, { file: f.path })} className="panel2 min-w-0 rounded-xl border line p-3 hover:border-brand-500"><div className="truncate font-semibold">{AGENT_LABEL[key] ?? key}</div><div className="muted truncate text-xs">seo-{key} · {kb(f.size)}</div></Link>;
               })}</div>
             </Card>
           )}
           {flowGroups.size > 0 && (
             <Card title="Flows">
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{[...flowGroups.entries()].map(([g, fs]) => (
-                <Link key={g} href={href(id, { file: (fs.find((x) => /\.(html|md)$/.test(x.path)) ?? fs[0]).path })} className="panel2 rounded-xl border line p-3 hover:border-brand-500">
-                  <div className="font-semibold capitalize">{g.replace(/-/g, " ")}</div><div className="muted text-xs">{fs.length} file{fs.length === 1 ? "" : "s"}</div>
+                <Link key={g} href={href(id, { file: (fs.find((x) => /\.(html|md)$/.test(x.path)) ?? fs[0]).path })} className="panel2 min-w-0 rounded-xl border line p-3 hover:border-brand-500">
+                  <div className="truncate font-semibold capitalize">{g.replace(/-/g, " ")}</div><div className="muted text-xs">{fs.length} file{fs.length === 1 ? "" : "s"}</div>
                 </Link>
               ))}</div>
             </Card>
@@ -144,11 +144,11 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
       )}
 
       {v === "categories" && ((data?.categories ?? []).length === 0 ? <Card><div className="muted">No categories yet.</div></Card> : data!.categories!.map((c, i) => (
-        <section key={i} id={`cat-${i}`} className="panel scroll-mt-6 p-5">
-          <div className="mb-3 flex items-center gap-4"><ScoreRing score={c.score ?? null} size={64} /><h2 className="text-lg font-bold">{c.name}</h2></div>
-          {(c.what_works ?? []).length > 0 && <div className="mb-4"><h4 className="mb-1 text-xs font-bold uppercase tracking-wider text-low">What works</h4><ul className="list-disc space-y-1 pl-5 text-sm">{c.what_works!.map((w, j) => <li key={j}>{w}</li>)}</ul></div>}
+        <section key={i} id={`cat-${i}`} className="panel scroll-mt-6 p-4 sm:p-5">
+          <div className="mb-3 flex items-center gap-4"><ScoreRing score={c.score ?? null} size={64} /><h2 className="min-w-0 break-words text-lg font-bold">{c.name}</h2></div>
+          {(c.what_works ?? []).length > 0 && <div className="mb-4"><h4 className="mb-1 text-xs font-bold uppercase tracking-wider text-low">What works</h4><ul className="list-disc space-y-1 break-words pl-5 text-sm">{c.what_works!.map((w, j) => <li key={j}>{w}</li>)}</ul></div>}
           <div className="space-y-2">{(c.findings ?? []).map((f, j) => (
-            <div key={j} className={`panel2 rounded-lg border-l-4 px-4 py-3 ${sevBorder(fsev(f))}`}>
+            <div key={j} className={`panel2 break-words rounded-lg border-l-4 px-3 py-3 sm:px-4 ${sevBorder(fsev(f))}`}>
               <div className="font-semibold">{fsev(f) && <span className="mr-2"><SevBadge s={fsev(f)} /></span>}{ftitle(f)}</div>
               {typeof f !== "string" && (f.description || f.evidence) && <p className="mt-1 text-sm">{f.description || f.evidence}</p>}
               {typeof f !== "string" && f.recommendation && <p className="mt-1 text-sm text-low"><b>Fix:</b> {f.recommendation}</p>}
@@ -177,7 +177,7 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
           {phases.length > 0 && (
             <Card title="Action plan">
               <div className="grid gap-3 md:grid-cols-2">{phases.map((p, i) => (
-                <div key={i} className="panel2 rounded-xl border line p-4">
+                <div key={i} className="panel2 min-w-0 break-words rounded-xl border line p-4">
                   <div className="font-bold">{p.name} <span className="muted text-xs font-normal">{p.timeframe}</span></div>
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{(p.items ?? []).map((it, j) => <li key={j}>{String(it)}</li>)}</ul>
                 </div>
@@ -192,9 +192,9 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
         <Card title={`Screenshots (${shots.length})`}>
           {shots.length === 0 ? <div className="muted">No screenshots.</div> : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{shots.map((s) => (
-              <a key={s.path} href={fileUrl(id, s.path)} target="_blank" rel="noopener" className="panel2 overflow-hidden rounded-xl border line">
-                <img src={fileUrl(id, s.path)} alt={s.path} loading="lazy" className="h-52 w-full object-cover object-top" />
-                <div className="muted p-2 text-xs">{s.path.replace(/^screenshots\//, "")}</div>
+              <a key={s.path} href={fileUrl(id, s.path)} target="_blank" rel="noopener" className="panel2 min-w-0 overflow-hidden rounded-xl border line">
+                <img src={fileUrl(id, s.path)} alt={s.path} loading="lazy" className="h-52 w-full max-w-full object-cover object-top" />
+                <div className="muted truncate p-2 text-xs">{s.path.replace(/^screenshots\//, "")}</div>
               </a>
             ))}</div>
           )}

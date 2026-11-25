@@ -18,12 +18,12 @@ export default async function NewProject() {
       <h1 className="text-2xl font-semibold tracking-[-0.02em]">Add a website</h1>
       <p className="muted mt-1 text-sm">We run a site audit straight away and start tracking your keywords.</p>
       {full ? (
-        <div className="panel mt-6 p-6">
+        <div className="panel mt-6 p-4 sm:p-6">
           <p>Your {plan.name} plan includes {plan.limits.projects} website{plan.limits.projects === 1 ? "" : "s"}, and you are using all of them.</p>
-          <Link href="/app/billing" className="btn btn-primary mt-4">Upgrade for more websites</Link>
+          <Link href="/app/billing" className="btn btn-primary mt-4 w-full sm:w-auto">Upgrade for more websites</Link>
         </div>
       ) : (
-        <div className="panel mt-6 p-6">
+        <div className="panel mt-6 p-4 sm:p-6">
           <ActionForm action={createProject}>
             <label className="block"><span className="mb-1 block text-sm font-semibold">Website URL</span>
               <input name="url" required className="input" placeholder="https://www.example.com" /></label>

@@ -21,14 +21,14 @@ export function QuickView({ run, dir }: ViewProps) {
   const input = JSON.parse(run.input) as { url: string };
   return (
     <div className="space-y-5">
-      <section className="panel flex flex-wrap items-center gap-6 p-6">
+      <section className="panel flex flex-col gap-4 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6 sm:p-6">
         <ScoreRing score={r?.score ?? null} size={120} />
         <div className="min-w-0 flex-1">
           <div className="text-xs font-bold uppercase tracking-wider text-brand-600">Site audit</div>
-          <h1 className="truncate text-2xl font-semibold tracking-[-0.02em]">{input.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</h1>
+          <h1 className="truncate text-xl font-semibold tracking-[-0.02em] sm:text-2xl">{input.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</h1>
           <div className="muted mt-1 text-sm">{r ? `${r.pages.length} pages checked · ${new Date(r.generated_at).toLocaleString()}` : run.status === "failed" ? run.error : "Running…"}</div>
         </div>
-        <div className="flex gap-2 print:hidden">{running ? <CancelRunButton id={run.id} /> : <PrintButton />}</div>
+        <div className="flex flex-wrap gap-2 print:hidden">{running ? <CancelRunButton id={run.id} /> : <PrintButton />}</div>
       </section>
 
       {(running || !r) && <Card title={running ? "Running now" : "Activity"}><LiveLog id={run.id} running={running} compact={!running ? false : true} /></Card>}
@@ -36,9 +36,9 @@ export function QuickView({ run, dir }: ViewProps) {
       {r && (
         <>
           <Card title="Category scores">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
               {r.categories.map((c) => (
-                <a key={c.key} href={`#cat-${c.key}`} className="panel2 rounded-xl p-4 text-center hover:opacity-80">
+                <a key={c.key} href={`#cat-${c.key}`} className="panel2 rounded-xl p-3.5 text-center hover:opacity-80 sm:p-4">
                   <div className="text-3xl font-semibold tracking-[-0.02em]" style={{ color: scoreColor(c.score) }}>{c.score ?? "–"}</div>
                   <div className="mt-1 text-sm font-semibold">{c.label}</div>
                   {c.note && <div className="muted mt-1 text-[11px]">{c.note}</div>}
@@ -48,19 +48,19 @@ export function QuickView({ run, dir }: ViewProps) {
           </Card>
 
           {r.categories.map((c) => (
-            <section key={c.key} id={`cat-${c.key}`} className="panel scroll-mt-6 p-5">
-              <div className="mb-3 flex items-center gap-4"><ScoreRing score={c.score} size={60} /><h2 className="text-lg font-bold">{c.label}</h2></div>
+            <section key={c.key} id={`cat-${c.key}`} className="panel scroll-mt-6 p-4 sm:p-5">
+              <div className="mb-3 flex items-center gap-4"><ScoreRing score={c.score} size={60} /><h2 className="min-w-0 break-words text-lg font-bold">{c.label}</h2></div>
               {Object.keys(c.facts).length > 0 && (
                 <dl className="mb-4 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
                   {Object.entries(c.facts).filter(([, v]) => v != null && v !== "").map(([k, v]) => (
-                    <div key={k} className="panel2 flex justify-between gap-2 rounded-lg px-3 py-2"><dt className="muted">{FACT_LABELS[k] ?? k}</dt><dd className="font-semibold">{String(v)}</dd></div>
+                    <div key={k} className="panel2 flex justify-between gap-2 rounded-lg px-3 py-2"><dt className="muted min-w-0 break-words">{FACT_LABELS[k] ?? k}</dt><dd className="min-w-0 break-all text-right font-semibold">{String(v)}</dd></div>
                   ))}
                 </dl>
               )}
               {c.issues.length === 0 ? <p className="text-sm text-low">No issues found{c.score == null ? " (not measured)" : ""}.</p> : (
                 <div className="space-y-2">
                   {c.issues.map((i) => (
-                    <details key={i.id + i.title} className={`panel2 rounded-lg border-l-4 px-4 py-3 ${sevBorder(i.severity)}`}>
+                    <details key={i.id + i.title} className={`panel2 break-words rounded-lg border-l-4 px-3 py-3 sm:px-4 ${sevBorder(i.severity)}`}>
                       <summary className="cursor-pointer list-none font-semibold"><span className="mr-2"><SevBadge s={i.severity} /></span>{i.title}{i.affected_pages ? <span className="muted ml-2 text-xs font-normal">{i.affected_pages} page{i.affected_pages === 1 ? "" : "s"}</span> : null}</summary>
                       {i.detail && <p className="mt-2 text-sm">{i.detail}</p>}
                       {i.evidence && <p className="muted mt-1 break-words text-xs">Evidence: {i.evidence}</p>}
@@ -73,7 +73,7 @@ export function QuickView({ run, dir }: ViewProps) {
           ))}
 
           <Card title={`Pages (${r.pages.length})`}>
-            <div className="overflow-x-auto">
+            <div className="table-wrap">
               <table className="w-full min-w-[640px] text-sm">
                 <thead><tr className="muted border-b line text-left text-xs"><th className="py-2">Page</th><th>Status</th><th>Score</th><th>Words</th><th>Issues</th></tr></thead>
                 <tbody>{r.pages.map((p) => (

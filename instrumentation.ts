@@ -1,9 +1,21 @@
 /** Starts the background worker once per Node.js server process (not in the edge runtime). */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  dropPlaceholderEnv();
   await guardStdin();
   const { startWorker } = await import("./lib/worker");
   startWorker();
+}
+
+/**
+ * Hosting panels that refuse empty variables (Hostinger) get "-" or "none" as placeholders. The server
+ * reads env at runtime (next.config.ts does not run in a standalone server), so drop them here, before
+ * any setting is read, and the admin Integrations values or built-in defaults apply instead.
+ */
+function dropPlaceholderEnv() {
+  for (const [k, v] of Object.entries(process.env)) {
+    if (v != null && ["-", "none"].includes(v.trim().toLowerCase())) delete process.env[k];
+  }
 }
 
 /**

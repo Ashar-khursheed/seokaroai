@@ -13,12 +13,12 @@ export default async function Settings() {
       <Card title="Profile and emails">
         <ActionForm action={updateProfile}>
           <label className="block"><span className="mb-1 block text-sm font-semibold">Name</span><input name="name" defaultValue={user.name} maxLength={120} className="input" /></label>
-          <div className="text-sm"><span className="font-semibold">Email:</span> {user.email} {user.emailVerifiedAt ? <span className="text-emerald-600">✓ confirmed</span> : <span className="text-amber-600">not confirmed</span>}</div>
+          <div className="break-words text-sm"><span className="font-semibold">Email:</span> {user.email} {user.emailVerifiedAt ? <span className="text-emerald-600">✓ confirmed</span> : <span className="text-amber-600">not confirmed</span>}</div>
           <fieldset className="space-y-2 text-sm">
             <legend className="mb-1 font-semibold">Email me</legend>
-            <label className="flex items-center gap-2"><input type="checkbox" name="emailRuns" defaultChecked={!!user.emailRuns} /> When an audit or keyword battle finishes</label>
-            <label className="flex items-center gap-2"><input type="checkbox" name="emailAlerts" defaultChecked={!!user.emailAlerts} /> Ranking alerts (big moves, top-10 changes)</label>
-            <label className="flex items-center gap-2"><input type="checkbox" name="emailWeekly" defaultChecked={!!user.emailWeekly} /> Weekly report every Monday</label>
+            <label className="flex items-start gap-2 sm:items-center"><input type="checkbox" name="emailRuns" defaultChecked={!!user.emailRuns} className="mt-1 shrink-0 sm:mt-0" /> <span>When an audit or keyword battle finishes</span></label>
+            <label className="flex items-start gap-2 sm:items-center"><input type="checkbox" name="emailAlerts" defaultChecked={!!user.emailAlerts} className="mt-1 shrink-0 sm:mt-0" /> <span>Ranking alerts (big moves, top-10 changes)</span></label>
+            <label className="flex items-start gap-2 sm:items-center"><input type="checkbox" name="emailWeekly" defaultChecked={!!user.emailWeekly} className="mt-1 shrink-0 sm:mt-0" /> <span>Weekly report every Monday</span></label>
           </fieldset>
           <SubmitButton pendingText="Saving…">Save</SubmitButton>
         </ActionForm>

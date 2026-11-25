@@ -21,8 +21,8 @@ export function ActionForm({ action, children, className = "space-y-4", resetOnO
   useEffect(() => { if (state.ok && resetOnOk) ref.current?.reset(); }, [state, resetOnOk]);
   return (
     <form ref={ref} action={formAction} className={className}>
-      {state.error && <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-200">{state.error}</div>}
-      {state.ok && state.message && <div role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{state.message}</div>}
+      {state.error && <div role="alert" className="break-words rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-200">{state.error}</div>}
+      {state.ok && state.message && <div role="status" className="break-words rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{state.message}</div>}
       {children}
     </form>
   );
@@ -85,7 +85,7 @@ export function LiveLog({ id, running, compact = false }: { id: string; running:
       {!compact && agents.length > 0 && (
         <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
           <span className="muted">{agents.length} agents · {events.length} events</span>
-          <select className="input !w-auto !py-1 text-xs" value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filter activity">
+          <select className="input max-w-full !w-auto !py-1 text-xs" value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filter activity">
             <option value="all">All activity</option>
             <option value="main">Orchestrator only</option>
             {agents.map((a) => <option key={a} value={a}>{a}</option>)}

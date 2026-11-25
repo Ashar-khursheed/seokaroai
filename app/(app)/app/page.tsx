@@ -59,9 +59,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       {projects.length > 0 && (
         <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border line bg-[var(--line)] md:grid-cols-4">
           {[["Websites", projects.length, "Globe"], ["Keywords in top 10", totals.top10, "TrendingUp"], ["Tracked keywords", totals.total, "Target"], ["Reports this month", usage.quick + usage.deep + usage.keyword + usage.fix, "FileText"]].map(([l, v, ic]) => (
-            <div key={l as string} className="bg-[var(--panel)] p-5">
-              <div className="muted flex items-center gap-2 text-[12.5px]"><Icon name={ic as string} size={14} />{l}</div>
-              <div className="mt-2 text-[28px] font-semibold tabular-nums tracking-tight">{v}</div>
+            <div key={l as string} className="bg-[var(--panel)] p-4 sm:p-5">
+              <div className="muted flex items-center gap-2 text-[12.5px]"><Icon name={ic as string} size={14} className="shrink-0" /><span className="truncate">{l}</span></div>
+              <div className="mt-2 text-[24px] sm:text-[28px] font-semibold tabular-nums tracking-tight">{v}</div>
             </div>
           ))}
         </div>
@@ -70,7 +70,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       {projects.length === 0 ? (
         <section className="panel relative overflow-hidden">
           <div className="grid-bg pointer-events-none absolute inset-0" />
-          <div className="relative grid place-items-center px-6 py-20 text-center">
+          <div className="relative grid place-items-center px-4 py-14 text-center sm:px-6 sm:py-20">
             <span className="grid h-12 w-12 place-items-center rounded-2xl border line bg-[var(--panel2)] text-brand-500"><Icon name="Globe" size={22} /></span>
             <h2 className="mt-5 text-xl font-semibold tracking-tight">Add your first website</h2>
             <p className="muted mt-2 max-w-md text-[15px]">We run a site audit straight away and start tracking the keywords you add. Connect WordPress, Shopify or GitHub later to ship fixes.</p>
@@ -83,12 +83,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             const b = rankBuckets(kws.filter((k) => k.projectId === p.id));
             return (
               <Reveal key={p.id} delay={i * 50}>
-                <Link href={`/app/projects/${p.id}`} className="panel card-hover flex h-full gap-5 p-5">
+                <Link href={`/app/projects/${p.id}`} className="panel card-hover flex h-full gap-4 p-4 sm:gap-5 sm:p-5">
                   <ScoreRing score={p.lastScore} size={78} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-semibold">{p.name}</div>
                     <div className="muted truncate text-[13px]">{p.domain} · {p.country}</div>
-                    <div className="mt-3 flex gap-4 text-[12.5px]">
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12.5px]">
                       <span><b className="tabular-nums">{b.top3}</b> <span className="muted">top 3</span></span>
                       <span><b className="tabular-nums">{b.top10}</b> <span className="muted">top 10</span></span>
                       <span><b className="tabular-nums">{b.total}</b> <span className="muted">tracked</span></span>
@@ -109,13 +109,13 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               {runs.map((r) => {
                 const s = parseJson<{ top_issues?: { title: string }[] }>(r.summary, {});
                 return (
-                  <Link key={r.id} href={`/app/runs/${encodeURIComponent(r.id)}`} className="flex items-center gap-3.5 rounded-xl px-2 py-2.5 transition hover:bg-[var(--panel2)]">
+                  <Link key={r.id} href={`/app/runs/${encodeURIComponent(r.id)}`} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-[var(--panel2)] sm:gap-3.5">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border line text-brand-500"><Icon name={KIND_ICON[r.kind] ?? "FileText"} size={16} /></span>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[14px] font-medium">{r.title}</div>
                       <div className="muted truncate text-[12.5px]">{KIND_LABEL[r.kind]} · {timeAgo(r.createdAt)}{s.top_issues?.[0] ? ` · ${s.top_issues[0].title}` : ""}</div>
                     </div>
-                    {r.score != null && <span className="text-[15px] font-semibold tabular-nums">{r.score}</span>}
+                    {r.score != null && <span className="shrink-0 text-[15px] font-semibold tabular-nums">{r.score}</span>}
                     <StatusPill status={r.status} />
                   </Link>
                 );
@@ -140,20 +140,22 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <Card title="Biggest ranking moves">
           {!(await rankTrackingAvailable()) && <p className="muted mb-3 text-[12.5px]">Live rank tracking is not switched on for this server yet.</p>}
           {movers.length === 0 ? <p className="muted text-[14px]">Moves appear after the second check of a keyword.</p> : (
-            <table className="w-full text-[14px]"><tbody>{movers.map((k) => (
-              <tr key={k.id} className="border-b line last:border-0">
-                <td className="py-2.5"><Link href={`/app/projects/${k.projectId}?tab=rankings`} className="font-medium hover:text-brand-500">{k.keyword}</Link><div className="muted text-[12px]">{projectName.get(k.projectId)}</div></td>
-                <td className="py-2 text-right"><Position value={k.position} /></td>
-                <td className="w-14 py-2 text-right"><Delta from={k.previousPosition} to={k.position} /></td>
-              </tr>
-            ))}</tbody></table>
+            <div className="table-wrap">
+              <table className="w-full text-[14px]"><tbody>{movers.map((k) => (
+                <tr key={k.id} className="border-b line last:border-0">
+                  <td className="wrap py-2.5 pr-3"><Link href={`/app/projects/${k.projectId}?tab=rankings`} className="font-medium hover:text-brand-500">{k.keyword}</Link><div className="muted text-[12px]">{projectName.get(k.projectId)}</div></td>
+                  <td className="py-2 text-right"><Position value={k.position} /></td>
+                  <td className="w-14 py-2 text-right"><Delta from={k.previousPosition} to={k.position} /></td>
+                </tr>
+              ))}</tbody></table>
+            </div>
           )}
         </Card>
         <Card title="Latest keyword battles" action={<Link href="/app/battles/new" className="text-[12.5px] font-medium text-brand-500">New battle</Link>}>
           {battles.length === 0 ? <p className="muted text-[14px]">See exactly what the top 3 results do that your page does not.</p> : battles.map((r) => (
             <Link key={r.id} href={`/app/runs/${encodeURIComponent(r.id)}`} className="flex items-center gap-3 border-b line py-2.5 last:border-0 hover:opacity-80">
-              <Icon name="Swords" size={15} className="text-brand-500" /><span className="flex-1 truncate text-[14px]">{r.title}</span>
-              {r.score != null && <b className="tabular-nums">{r.score}</b>}<StatusPill status={r.status} />
+              <Icon name="Swords" size={15} className="shrink-0 text-brand-500" /><span className="min-w-0 flex-1 truncate text-[14px]">{r.title}</span>
+              {r.score != null && <b className="shrink-0 tabular-nums">{r.score}</b>}<StatusPill status={r.status} />
             </Link>
           ))}
         </Card>
@@ -163,5 +165,5 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 }
 
 function Notice({ tone, children }: { tone: "ok" | "warn"; children: React.ReactNode }) {
-  return <div className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-[14px] ${tone === "ok" ? "border-low/30 bg-low/10" : "border-high/30 bg-high/10"}`}><Icon name={tone === "ok" ? "CircleCheck" : "TriangleAlert"} size={16} className={tone === "ok" ? "text-low" : "text-high"} />{children}</div>;
+  return <div className={`flex items-start gap-2 rounded-xl border px-4 py-3 text-[14px] sm:items-center ${tone === "ok" ? "border-low/30 bg-low/10" : "border-high/30 bg-high/10"}`}><Icon name={tone === "ok" ? "CircleCheck" : "TriangleAlert"} size={16} className={`mt-0.5 shrink-0 sm:mt-0 ${tone === "ok" ? "text-low" : "text-high"}`} /><span className="min-w-0 flex-1">{children}</span></div>;
 }

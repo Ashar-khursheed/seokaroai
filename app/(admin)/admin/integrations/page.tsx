@@ -49,7 +49,7 @@ export default async function IntegrationsPage() {
               ))}
             </div>
           </details>
-          <SubmitButton className="btn btn-primary" pendingText="Saving…">Save and test</SubmitButton>
+          <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Saving…">Save and test</SubmitButton>
         </ActionForm>
         <div className="mt-5 grid gap-3 border-t line pt-5 sm:grid-cols-3">
           <ActionForm action={paddleCatalog} className="space-y-2">
@@ -58,7 +58,7 @@ export default async function IntegrationsPage() {
           </ActionForm>
           <ActionForm action={paddleWebhook} className="space-y-2">
             <SubmitButton className="btn w-full" pendingText="Creating…"><Icon name="Workflow" size={15} />Create webhook</SubmitButton>
-            <p className="muted text-[12px]">{publicUrl ? `Points Paddle at ${config.appUrl}/api/webhooks/paddle and stores the secret.` : `Needs the live https address. APP_URL is ${config.appUrl} right now.`}</p>
+            <p className="muted break-words text-[12px]">{publicUrl ? `Points Paddle at ${config.appUrl}/api/webhooks/paddle and stores the secret.` : `Needs the live https address. APP_URL is ${config.appUrl} right now.`}</p>
           </ActionForm>
           <ActionForm action={paddleTest} className="space-y-2">
             <SubmitButton className="btn w-full" pendingText="Testing…"><Icon name="RefreshCw" size={15} />Test connection</SubmitButton>
@@ -75,7 +75,7 @@ export default async function IntegrationsPage() {
             <Secret label="API login (email)" name="login" value={i.dataforseo.login} source={await src("dataforseo", "login")} section="dataforseo" placeholder="you@example.com" reveal />
             <Secret label="API password" name="password" value={i.dataforseo.password} source={await src("dataforseo", "password")} section="dataforseo" placeholder="API password (not your account password)" />
           </div>
-          <SubmitButton className="btn btn-primary" pendingText="Saving…">Save and test</SubmitButton>
+          <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Saving…">Save and test</SubmitButton>
         </ActionForm>
       </Section>
 
@@ -87,7 +87,7 @@ export default async function IntegrationsPage() {
             <Secret label="Anthropic API key" name="anthropicKey" value={i.ai.anthropicKey} source={await src("ai", "anthropicKey")} section="ai" placeholder="sk-ant-…" />
             <Secret label="OpenAI API key" name="openaiKey" value={i.ai.openaiKey} source={await src("ai", "openaiKey")} section="ai" placeholder="sk-…" />
           </div>
-          <SubmitButton className="btn btn-primary" pendingText="Saving…">Save</SubmitButton>
+          <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Saving…">Save</SubmitButton>
         </ActionForm>
       </Section>
 
@@ -103,7 +103,7 @@ export default async function IntegrationsPage() {
             <Field label="From"><input name="from" defaultValue={i.smtp.from} className="input" /></Field>
           </div>
           <label className="flex items-center gap-2 text-[13.5px]"><input type="checkbox" name="secure" defaultChecked={i.smtp.secure} className="accent-[#1f86ff]" />Use TLS from the start (port 465)</label>
-          <SubmitButton className="btn btn-primary" pendingText="Saving…">Save and test</SubmitButton>
+          <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Saving…">Save and test</SubmitButton>
         </ActionForm>
       </Section>
 
@@ -111,8 +111,8 @@ export default async function IntegrationsPage() {
       <Section icon="Gauge" title="Google PageSpeed" status={i.google.apiKey ? "Connected" : "Off: performance not measured"} ok={!!i.google.apiKey}
         help={<>Adds Lighthouse and Core Web Vitals scores to site audits. Google Cloud console → enable PageSpeed Insights API → create an API key.</>}>
         <ActionForm action={saveGoogle} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1"><Secret label="API key" name="apiKey" value={i.google.apiKey} source={await src("google", "apiKey")} section="google" placeholder="AIza…" /></div>
-          <SubmitButton className="btn btn-primary" pendingText="Saving…">Save</SubmitButton>
+          <div className="min-w-0 flex-1"><Secret label="API key" name="apiKey" value={i.google.apiKey} source={await src("google", "apiKey")} section="google" placeholder="AIza…" /></div>
+          <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Saving…">Save</SubmitButton>
         </ActionForm>
       </Section>
     </div>
@@ -122,14 +122,14 @@ export default async function IntegrationsPage() {
 function Section({ icon, title, status, ok, help, children }: { icon: string; title: string; status: string; ok: boolean; help: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="panel overflow-hidden">
-      <div className="flex flex-wrap items-center gap-3 border-b line px-6 py-4">
-        <span className="grid h-9 w-9 place-items-center rounded-lg border line text-brand-500"><Icon name={icon} size={17} /></span>
-        <h2 className="flex-1 font-semibold">{title}</h2>
+      <div className="flex flex-wrap items-center gap-3 border-b line px-4 py-4 sm:px-6">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border line text-brand-500"><Icon name={icon} size={17} /></span>
+        <h2 className="min-w-0 flex-1 font-semibold">{title}</h2>
         <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ring-inset ${ok ? "bg-low/10 text-low ring-low/30" : "bg-[var(--panel2)] muted ring-[var(--line)]"}`}>
           <span className="h-1.5 w-1.5 rounded-full bg-current" />{status}
         </span>
       </div>
-      <div className="px-6 py-5">
+      <div className="px-4 py-5 sm:px-6">
         <p className="muted mb-5 text-[13.5px] leading-relaxed">{help}</p>
         {children}
       </div>
@@ -141,7 +141,7 @@ function Step({ n, done, children }: { n: number; done: boolean; children: React
   return (
     <li className="flex gap-2.5">
       <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-semibold ${done ? "bg-low text-white" : "border line"}`}>{done ? <Icon name="Check" size={12} /> : n}</span>
-      <span>{children}</span>
+      <span className="min-w-0 break-words">{children}</span>
     </li>
   );
 }
@@ -153,7 +153,7 @@ function Field({ label, children, className = "" }: { label: string; children: R
 function Secret({ label, name, value, source, section, placeholder, reveal = false }: { label: string; name: string; value: string; source: Src; section: string; placeholder?: string; reveal?: boolean }) {
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between gap-2 text-[13px]">
+      <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 text-[13px]">
         <span className="font-medium">{label}</span>
         {source !== "none" && (
           <span className="muted flex items-center gap-2 text-[11.5px]">

@@ -39,7 +39,7 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
     <>
       <div className="px-4 pb-2">
         <div className="text-xs font-bold uppercase tracking-wider text-brand-600">Keyword battle</div>
-        <div className="font-bold">“{input.keyword}”</div>
+        <div className="break-words font-bold">“{input.keyword}”</div>
         <div className="muted truncate text-xs">{input.targetUrl}</div>
         <div className="mt-1"><StatusPill status={run.status} /></div>
       </div>
@@ -57,8 +57,8 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
     <RunShell side={side}>
       {v === "file" && file && <Card><FileView id={id} dir={dir} rel={file} /></Card>}
       {v === "log" && (
-        <Card title={<span className="flex items-center gap-3">Live activity {running && <CancelRunButton id={id} />}</span>}>
-          {run.error && <div className="mb-3 rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{run.error}</div>}
+        <Card title={<span className="flex flex-wrap items-center gap-3">Live activity {running && <CancelRunButton id={id} />}</span>}>
+          {run.error && <div className="mb-3 break-words rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{run.error}</div>}
           <LiveLog id={id} running={running} />
         </Card>
       )}
@@ -66,11 +66,11 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
 
       {v === "battle" && (
         <>
-          <section className="panel flex flex-wrap items-center gap-6 p-6">
+          <section className="panel flex flex-col gap-4 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6 sm:p-6">
             <ScoreRing score={cmp?.score ?? null} size={120} />
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold uppercase tracking-wider text-brand-600">How competitive your page is today</div>
-              <h1 className="text-2xl font-bold">“{input.keyword}”</h1>
+              <h1 className="break-words text-xl font-bold sm:text-2xl">“{input.keyword}”</h1>
               <div className="muted truncate text-sm">{input.targetUrl} · {input.country}</div>
               <div className="mt-2 text-sm">Your position: <b>{cmp?.our_position ? `#${cmp.our_position}` : "not in the results checked"}</b></div>
             </div>
@@ -86,7 +86,7 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
                 return (
                   <li key={`${r.position}-${r.url}`} className={`flex gap-3 rounded-lg px-2 py-1 ${ours ? "bg-brand-50 font-semibold dark:bg-brand-700/30" : r.position <= 3 ? "panel2" : ""}`}>
                     <b className="w-6 shrink-0 text-right">{r.position}</b>
-                    <span className="min-w-0"><span className="block truncate">{r.title || r.domain}</span><a className="block truncate text-xs text-brand-500" href={r.url} target="_blank" rel="noopener noreferrer">{r.url}</a></span>
+                    <span className="min-w-0 flex-1"><span className="block truncate">{r.title || r.domain}</span><a className="block truncate text-xs text-brand-500" href={r.url} target="_blank" rel="noopener noreferrer">{r.url}</a></span>
                   </li>
                 );
               })}</ol>
@@ -96,9 +96,9 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
           {cmp?.intent && (
             <Card title="Search intent">
               <div className="grid gap-3 text-sm sm:grid-cols-3">
-                <div><div className="muted text-xs">What Google rewards</div><b>{cmp.intent.serp_intent}</b></div>
-                <div><div className="muted text-xs">Page type that wins</div><b>{cmp.intent.winning_page_type}</b></div>
-                <div><div className="muted text-xs">Your page type</div><b className={cmp.intent.match ? "text-low" : "text-crit"}>{cmp.intent.our_page_type} {cmp.intent.match ? "✓ match" : "✗ mismatch"}</b></div>
+                <div className="min-w-0 break-words"><div className="muted text-xs">What Google rewards</div><b>{cmp.intent.serp_intent}</b></div>
+                <div className="min-w-0 break-words"><div className="muted text-xs">Page type that wins</div><b>{cmp.intent.winning_page_type}</b></div>
+                <div className="min-w-0 break-words"><div className="muted text-xs">Your page type</div><b className={cmp.intent.match ? "text-low" : "text-crit"}>{cmp.intent.our_page_type} {cmp.intent.match ? "✓ match" : "✗ mismatch"}</b></div>
               </div>
               {cmp.intent.note && <p className="muted mt-3 text-sm">{cmp.intent.note}</p>}
             </Card>
@@ -106,7 +106,7 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
 
           {cmp?.metrics && (
             <Card title="Side by side: your page vs the top 3">
-              <div className="overflow-x-auto">
+              <div className="table-wrap">
                 <table className="w-full min-w-[760px] border-collapse text-sm">
                   <thead><tr className="panel2">
                     <th className="border line p-2 text-left">Signal</th>
@@ -117,9 +117,9 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
                   </tr></thead>
                   <tbody>{cmp.metrics.map((m, i) => (
                     <tr key={i} className="align-top">
-                      <td className="border line p-2"><div className="font-semibold">{m.label ?? m.key}</div>{m.note && <div className="muted text-xs">{m.note}</div>}</td>
+                      <td className="wrap border line p-2"><div className="font-semibold">{m.label ?? m.key}</div>{m.note && <div className="muted text-xs">{m.note}</div>}</td>
                       {COLS.map((c) => (
-                        <td key={c} className={`border line p-2 ${c === "target" ? (m.verdict === "gap" ? "bg-rose-50 font-semibold text-rose-900" : m.verdict === "ahead" ? "bg-emerald-50 font-semibold text-emerald-900" : "font-semibold") : ""}`}>{show(m[c])}</td>
+                        <td key={c} className={`wrap border line p-2 ${c === "target" ? (m.verdict === "gap" ? "bg-rose-50 font-semibold text-rose-900" : m.verdict === "ahead" ? "bg-emerald-50 font-semibold text-emerald-900" : "font-semibold") : ""}`}>{show(m[c])}</td>
                       ))}
                     </tr>
                   ))}</tbody>
@@ -131,14 +131,14 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
 
           {cmp?.topics && cmp.topics.length > 0 && (
             <Card title="Subtopics the top 3 cover">
-              <div className="overflow-x-auto">
+              <div className="table-wrap">
                 <table className="w-full min-w-[600px] border-collapse text-sm">
                   <thead><tr className="panel2"><th className="border line p-2 text-left">Subtopic</th>{COLS.map((c) => <th key={c} className="border line p-2">{pageLabel(c)}</th>)}</tr></thead>
                   <tbody>{cmp.topics.map((t, i) => {
                     const missing = !t.target && ["c1", "c2", "c3"].filter((c) => t[c] === true).length >= 2;
                     return (
                       <tr key={i} className={missing ? "bg-rose-50 text-rose-900" : ""}>
-                        <td className="border line p-2">{t.topic}{missing && <b className="ml-2 text-xs">missing on your page</b>}</td>
+                        <td className="wrap border line p-2">{t.topic}{missing && <b className="ml-2 text-xs">missing on your page</b>}</td>
                         {COLS.map((c) => <td key={c} className="border line p-2 text-center">{t[c] === true ? "✓" : t[c] === false ? "–" : show(t[c])}</td>)}
                       </tr>
                     );
@@ -161,7 +161,7 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
 function RecList({ recs, pageLabel }: { recs: Rec[]; pageLabel: (k?: string) => string }) {
   return (
     <div className="space-y-3">{recs.map((r, i) => (
-      <div key={i} className={`panel2 rounded-xl border-l-4 p-4 ${sevBorder(r.priority)}`}>
+      <div key={i} className={`panel2 break-words rounded-xl border-l-4 p-3.5 sm:p-4 ${sevBorder(r.priority)}`}>
         <div className="flex flex-wrap items-center gap-2 font-bold"><SevBadge s={r.priority} /> {r.title}{r.effort && <span className="muted text-xs font-normal">effort {r.effort}</span>}</div>
         {r.action && <p className="mt-2 whitespace-pre-wrap text-sm"><b>Do this:</b> {r.action}</p>}
         {(r.evidence ?? []).length > 0 && (

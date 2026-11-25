@@ -129,9 +129,9 @@ export function LocalFolderStart({ projectId, audits }: { projectId: number; aud
         <select value={source} onChange={(e) => setSource(e.target.value)} className="input"><option value="">Latest audit</option>{audits.map((a) => <option key={a.id} value={a.id}>{a.title}</option>)}</select></label>
       <label className="block"><span className="mb-1.5 block text-[13px] font-medium">Instructions (optional)</span>
         <input value={instructions} onChange={(e) => setInstructions(e.target.value)} maxLength={2000} className="input" placeholder="e.g. only change the templates in /views" /></label>
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={start} disabled={busy} className="btn btn-brand"><Icon name="Folder" size={15} />{busy ? "Working…" : "Choose folder and propose fixes"}</button>
-        <span className="muted flex items-center gap-1.5 text-[12px]"><Icon name="Lock" size={12} />Only code and text files are read; nothing changes until you approve it.</span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <button type="button" onClick={start} disabled={busy} className="btn btn-brand w-full max-w-full whitespace-normal text-center sm:w-auto sm:whitespace-nowrap"><Icon name="Folder" size={15} className="shrink-0" />{busy ? "Working…" : "Choose folder and propose fixes"}</button>
+        <span className="muted flex items-center gap-1.5 text-[12px]"><Icon name="Lock" size={12} className="shrink-0" />Only code and text files are read; nothing changes until you approve it.</span>
       </div>
       {msg && <p className={`text-[13px] ${msg.tone === "error" ? "text-crit" : "muted"}`}>{msg.text}</p>}
     </div>
@@ -193,8 +193,8 @@ export function LocalApplyButton({ runId, connectorId, folderName }: { runId: st
   }
   return (
     <span className="flex flex-wrap items-center gap-3">
-      {msg && <span className="muted text-[12.5px]">{msg}</span>}
-      <button type="button" onClick={apply} disabled={busy} className="btn btn-brand"><Icon name="Folder" size={15} />{busy ? "Writing…" : "Apply to my folder"}</button>
+      {msg && <span className="muted break-words text-[12.5px]">{msg}</span>}
+      <button type="button" onClick={apply} disabled={busy} className="btn btn-brand"><Icon name="Folder" size={15} className="shrink-0" />{busy ? "Writing…" : "Apply to my folder"}</button>
     </span>
   );
 }

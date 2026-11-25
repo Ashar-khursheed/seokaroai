@@ -52,23 +52,23 @@ export function PostEditor({ post, action }: { post?: Post | null; action: (s: F
   const local = (d: Date | null | undefined) => (d ? new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "");
 
   return (
-    <ActionForm action={action} className="grid gap-6 xl:grid-cols-[1fr_340px]">
-      <div className="space-y-4">
+    <ActionForm action={action} className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]">
+      <div className="min-w-0 space-y-4">
         <input type="hidden" name="id" value={post?.id ?? ""} />
-        <input name="title" value={f.title} onChange={set("title")} required placeholder="Post title (H1)" className="input !text-xl !font-bold" />
-        <div className="flex items-center gap-2 text-sm"><span className="muted">/blog/</span><input name="slug" value={f.slug} onChange={set("slug")} placeholder="auto-from-title" className="input !py-1.5" /></div>
+        <input name="title" value={f.title} onChange={set("title")} required placeholder="Post title (H1)" className="input !text-lg sm:!text-xl !font-bold" />
+        <div className="flex flex-col gap-1.5 text-sm sm:flex-row sm:items-center sm:gap-2"><span className="muted shrink-0">/blog/</span><input name="slug" value={f.slug} onChange={set("slug")} placeholder="auto-from-title" className="input min-w-0 !py-1.5" /></div>
         <textarea name="excerpt" value={f.excerpt} onChange={set("excerpt")} rows={2} maxLength={400} placeholder="Excerpt: one or two sentences shown on the blog list and under the title" className="input" />
         <div className="panel overflow-hidden">
-          <div className="flex border-b line text-sm">
+          <div className="flex flex-wrap items-center border-b line text-sm">
             {(["write", "preview"] as const).map((t) => <button key={t} type="button" onClick={() => setTab(t)} className={`px-4 py-2 font-semibold capitalize ${tab === t ? "border-b-2 border-brand-500" : "muted"}`}>{t}</button>)}
-            <span className="muted ml-auto self-center px-3 text-xs">Markdown · ## for H2 · [text](/features/rank-tracker) for links</span>
+            <span className="muted px-3 py-1.5 text-xs sm:ml-auto sm:py-0">Markdown · ## for H2 · [text](/features/rank-tracker) for links</span>
           </div>
-          <textarea name="content" value={f.content} onChange={set("content")} rows={28} className={`w-full resize-y bg-transparent p-4 font-mono text-sm outline-none ${tab === "write" ? "" : "hidden"}`} placeholder="Write your post in Markdown…" />
-          {tab === "preview" && <div className="md max-h-[70vh] overflow-auto p-6" dangerouslySetInnerHTML={{ __html: renderMarkdown(f.content || "_Nothing to preview yet._") }} />}
+          <textarea name="content" value={f.content} onChange={set("content")} rows={28} className={`w-full resize-y bg-transparent p-3.5 sm:p-4 font-mono text-sm outline-none ${tab === "write" ? "" : "hidden"}`} placeholder="Write your post in Markdown…" />
+          {tab === "preview" && <div className="md max-h-[70vh] overflow-auto p-4 sm:p-6" dangerouslySetInnerHTML={{ __html: renderMarkdown(f.content || "_Nothing to preview yet._") }} />}
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
         <div className="panel space-y-3 p-4">
           <div className="text-sm font-bold">Publish</div>
           <select name="status" defaultValue={post?.status ?? "draft"} className="input"><option value="draft">Draft</option><option value="published">Published</option></select>
@@ -85,7 +85,7 @@ export function PostEditor({ post, action }: { post?: Post | null; action: (s: F
             <div className="truncate text-xs text-emerald-700">seokaroai.com › blog › {f.slug || "post-url"}</div>
             <div className="muted line-clamp-2 text-xs">{f.metaDescription || f.excerpt || "Meta description preview"}</div>
           </div>
-          <ul className="space-y-1.5 text-xs">{checks.map((c) => <li key={c.text} className="flex gap-2"><span className={c.ok ? "text-emerald-600" : c.warn ? "text-amber-500" : "text-rose-600"}>{c.ok ? "✓" : c.warn ? "!" : "✗"}</span>{c.text}</li>)}</ul>
+          <ul className="space-y-1.5 text-xs">{checks.map((c) => <li key={c.text} className="flex gap-2"><span className={`shrink-0 ${c.ok ? "text-emerald-600" : c.warn ? "text-amber-500" : "text-rose-600"}`}>{c.ok ? "✓" : c.warn ? "!" : "✗"}</span><span className="min-w-0 break-words">{c.text}</span></li>)}</ul>
         </div>
         <div className="panel space-y-3 p-4">
           <div className="text-sm font-bold">Details</div>

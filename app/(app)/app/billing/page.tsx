@@ -39,7 +39,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
                 {user.planRenewsAt && plan.code !== "free" && <> · {user.planStatus === "canceled" ? "ends" : "renews"} {user.planRenewsAt.toLocaleDateString()}</>}
               </div>
             </div>
-            {hasSub && <form action={openBillingPortal}><button className="btn"><Icon name="CreditCard" size={15} />Manage card, invoices &amp; cancellation</button></form>}
+            {hasSub && <form action={openBillingPortal} className="w-full sm:w-auto"><button className="btn w-full max-w-full whitespace-normal text-center sm:w-auto sm:whitespace-nowrap"><Icon name="CreditCard" size={15} className="shrink-0" />Manage card, invoices &amp; cancellation</button></form>}
           </div>
           {user.planStatus === "past_due" && <p className="mt-4 rounded-lg border border-crit/30 bg-crit/10 p-3 text-[14px]">Your last payment failed. Update your card in the portal to keep your plan.</p>}
         </Card>
@@ -56,11 +56,11 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
       </div>
 
       <section>
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h2 className="text-xl font-semibold tracking-tight">{hasSub ? "Change plan" : "Upgrade"}</h2>
-          <div className="inline-flex rounded-xl border line p-1" style={{ background: "var(--panel)" }}>
-            <a href="?cycle=monthly" className={`rounded-lg px-4 py-1.5 text-[13px] font-medium ${cycle === "monthly" ? "bg-[var(--ink)] text-[var(--bg)]" : "muted"}`}>Monthly</a>
-            <a href="?cycle=yearly" className={`rounded-lg px-4 py-1.5 text-[13px] font-medium ${cycle === "yearly" ? "bg-[var(--ink)] text-[var(--bg)]" : "muted"}`}>Yearly · 2 months free</a>
+          <div className="inline-flex w-fit max-w-full rounded-xl border line p-1" style={{ background: "var(--panel)" }}>
+            <a href="?cycle=monthly" className={`rounded-lg px-3 py-1.5 text-[13px] font-medium sm:px-4 ${cycle === "monthly" ? "bg-[var(--ink)] text-[var(--bg)]" : "muted"}`}>Monthly</a>
+            <a href="?cycle=yearly" className={`rounded-lg px-3 py-1.5 text-[13px] font-medium sm:px-4 ${cycle === "yearly" ? "bg-[var(--ink)] text-[var(--bg)]" : "muted"}`}>Yearly · 2 months free</a>
           </div>
         </div>
         {!ready && <Notice icon="Clock" tone="warn">Online payments are being set up. To upgrade now, email {config.supportEmail}.</Notice>}
@@ -70,7 +70,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
             const current = plan.code === c;
             const priceId = priceIds[c];
             return (
-              <div key={c} className={`panel flex flex-col p-6 ${sp.plan === c || p.popular ? "border-brand-500/60 shadow-[0_0_0_1px_var(--color-brand-500)]" : ""}`}>
+              <div key={c} className={`panel flex flex-col p-4 sm:p-6 ${sp.plan === c || p.popular ? "border-brand-500/60 shadow-[0_0_0_1px_var(--color-brand-500)]" : ""}`}>
                 <div className="flex items-center justify-between"><span className="font-semibold">{p.name}</span>{p.popular && <span className="chip !py-0.5 text-brand-500">Popular</span>}</div>
                 <div className="mt-3 text-4xl font-semibold tracking-tight">${cycle === "yearly" ? p.priceYearly : p.priceMonthly}<span className="muted text-sm font-normal">/{cycle === "yearly" ? "year" : "month"}</span></div>
                 <ul className="mt-5 flex-1 space-y-2 text-[13.5px]">{p.highlights.map((h) => <li key={h} className="flex gap-2"><Icon name="Check" size={15} className="mt-0.5 shrink-0 text-low" />{h}</li>)}</ul>
@@ -91,5 +91,5 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
 }
 
 function Notice({ icon, tone, children }: { icon: string; tone: "ok" | "warn"; children: React.ReactNode }) {
-  return <div className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-[14px] ${tone === "ok" ? "border-low/30 bg-low/10" : "border-high/30 bg-high/10"}`}><Icon name={icon} size={16} className={tone === "ok" ? "text-low" : "text-high"} />{children}</div>;
+  return <div className={`flex items-start gap-2 rounded-xl border px-4 py-3 text-[14px] sm:items-center ${tone === "ok" ? "border-low/30 bg-low/10" : "border-high/30 bg-high/10"}`}><Icon name={icon} size={16} className={`mt-0.5 shrink-0 sm:mt-0 ${tone === "ok" ? "text-low" : "text-high"}`} /><span className="min-w-0 flex-1">{children}</span></div>;
 }

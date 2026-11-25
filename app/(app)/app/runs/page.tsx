@@ -12,22 +12,22 @@ export default async function Runs({ searchParams }: { searchParams: Promise<{ k
   const kinds = kind && ["quick", "deep", "keyword"].includes(kind) ? [kind] : undefined;
   const runs = await recentRuns({ userId: user.id, kinds, limit: 200 });
   const filter = (k: string | undefined, label: string) => (
-    <Link href={k ? `/app/runs?kind=${k}` : "/app/runs"} className={`rounded-lg px-3 py-1.5 text-sm ${kind === k || (!kind && !k) ? "bg-brand-600 text-white" : "panel2"}`}>{label}</Link>
+    <Link href={k ? `/app/runs?kind=${k}` : "/app/runs"} className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm ${kind === k || (!kind && !k) ? "bg-brand-600 text-white" : "panel2"}`}>{label}</Link>
   );
   return (
     <div className="space-y-5">
       <AutoRefresh active={runs.some((r) => r.status === "running" || r.status === "queued")} ms={10000} />
       <h1 className="text-2xl font-semibold tracking-[-0.02em]">All reports</h1>
-      <div className="flex flex-wrap gap-2">{filter(undefined, "All")}{filter("quick", "Site audits")}{filter("deep", "AI deep audits")}{filter("keyword", "Keyword battles")}</div>
+      <div className="no-scrollbar flex gap-2 overflow-x-auto sm:flex-wrap">{filter(undefined, "All")}{filter("quick", "Site audits")}{filter("deep", "AI deep audits")}{filter("keyword", "Keyword battles")}</div>
       <Card>
         {runs.length === 0 ? <p className="muted text-sm">No reports yet.</p> : (
           <div className="divide-y line">
             {runs.map((r) => (
-              <Link key={r.id} href={`/app/runs/${encodeURIComponent(r.id)}`} className="flex items-center gap-4 py-3 hover:opacity-80">
+              <Link key={r.id} href={`/app/runs/${encodeURIComponent(r.id)}`} className="flex items-center gap-3 py-3 hover:opacity-80 sm:gap-4">
                 <ScoreRing score={r.score} size={48} label="" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-semibold">{r.title}</div>
-                  <div className="muted text-xs">{KIND_LABEL[r.kind]}{r.triggerType === "schedule" ? " · scheduled" : ""} · {timeAgo(r.createdAt)}</div>
+                  <div className="muted truncate text-xs">{KIND_LABEL[r.kind]}{r.triggerType === "schedule" ? " · scheduled" : ""} · {timeAgo(r.createdAt)}</div>
                 </div>
                 <StatusPill status={r.status} />
               </Link>

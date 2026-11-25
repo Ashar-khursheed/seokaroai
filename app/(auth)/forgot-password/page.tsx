@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Reset your password", robots: { inde
 export default function Forgot() {
   return (
     <div>
-      <h1 className="text-[28px] font-semibold tracking-[-0.03em]">Forgot your password?</h1>
+      <h1 className="break-words text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-[28px]">Forgot your password?</h1>
       <p className="muted mt-1 text-sm">Enter your email and we will send you a reset link.</p>
       <ActionForm action={forgotPassword} className="mt-6 space-y-4">
         <label className="block"><span className="mb-1 block text-sm font-semibold">Email</span><input name="email" type="email" required autoComplete="email" className="input" /></label>

@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 export default function About() {
   return (
     <>
-      <article className="mx-auto max-w-3xl px-4 pt-16 sm:px-6">
-        <h1 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">SEO advice should come with evidence</h1>
-        <div className="md mt-8 !text-[17px]">
+      <article className="mx-auto max-w-3xl px-4 pt-10 sm:px-6 sm:pt-16">
+        <h1 className="break-words text-[2rem] font-semibold leading-tight tracking-[-0.03em] sm:text-5xl">SEO advice should come with evidence</h1>
+        <div className="md mt-6 !text-[15.5px] sm:mt-8 sm:!text-[17px]">
           <p>&ldquo;Karo&rdquo; means &ldquo;do it&rdquo;. We built SEOKaroAI for people who want to know what to <em>do</em> next with their website, not read another list of 300 warnings.</p>
           <h2>The problem</h2>
           <p>Most SEO tools report everything they can measure and leave the thinking to you. Most SEO advice is generic: write better content, build more links, improve speed. Neither tells you why the three pages above you rank and yours does not.</p>

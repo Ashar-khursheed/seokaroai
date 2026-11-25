@@ -16,9 +16,9 @@ export default async function Legal({ params }: { params: Promise<{ doc: string 
   const d = LEGAL[(await params).doc];
   if (!d) notFound();
   return (
-    <article className="mx-auto max-w-3xl px-4 pt-16 sm:px-6">
-      <h1 className="text-4xl font-semibold tracking-[-0.03em]">{d.title}</h1>
-      <div className="md mt-8" dangerouslySetInnerHTML={{ __html: renderMarkdown(d.body) }} />
+    <article className="mx-auto max-w-3xl px-4 pt-10 sm:px-6 sm:pt-16">
+      <h1 className="break-words text-[2rem] font-semibold leading-tight tracking-[-0.03em] sm:text-4xl">{d.title}</h1>
+      <div className="md mt-6 sm:mt-8" dangerouslySetInnerHTML={{ __html: renderMarkdown(d.body) }} />
     </article>
   );
 }

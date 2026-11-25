@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { Logo } from "./logo";
 import { Icon } from "./icons";
+import { MobileDrawer } from "./mobile-drawer";
 import { FEATURES } from "@/lib/content/features";
 import { config } from "@/lib/config";
 
 export function MarketingHeader() {
   return (
     <header className="sticky top-0 z-40 border-b line backdrop-blur-xl" style={{ background: "color-mix(in oklab, var(--bg) 78%, transparent)" }}>
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
-        <Link href="/" aria-label="SEOKaroAI home"><Logo size={26} /></Link>
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:h-16 sm:gap-6 sm:px-6">
+        <Link href="/" aria-label="SEOKaroAI home" className="shrink-0"><Logo size={24} /></Link>
         <nav className="hidden items-center gap-1 text-[14px] md:flex" aria-label="Main">
           <div className="group relative">
             <Link href="/features" className="muted flex items-center gap-1 rounded-lg px-3 py-2 transition hover:text-[var(--ink)]">
@@ -29,17 +30,27 @@ export function MarketingHeader() {
             <Link key={h} href={h} className="muted rounded-lg px-3 py-2 transition hover:text-[var(--ink)]">{l}</Link>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <Link href="/login" className="btn btn-ghost hidden sm:inline-flex">Log in</Link>
-          <Link href="/signup" className="btn btn-primary">Start free <Icon name="ArrowRight" size={15} /></Link>
-          <details className="relative md:hidden">
-            <summary className="btn btn-ghost list-none !px-2.5" aria-label="Open menu"><Icon name="Menu" size={18} /></summary>
-            <div className="panel absolute right-0 mt-2 w-64 p-2 shadow-2xl">
-              {[["Product", "/features"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"], ["Log in", "/login"]].map(([l, h]) => (
-                <Link key={h} href={h} className="block rounded-lg px-3 py-2 text-sm hover:bg-[var(--panel2)]">{l}</Link>
+          <Link href="/signup" className="btn btn-primary !px-3 sm:!px-[15px]">Start free <Icon name="ArrowRight" size={15} className="hidden min-[380px]:block" /></Link>
+          <MobileDrawer className="md:hidden" title={<Logo size={22} />}>
+            <div className="p-3">
+              <div className="muted px-3 pb-2 pt-1 text-[11px] font-medium uppercase tracking-wider">Product</div>
+              {FEATURES.map((f) => (
+                <Link key={f.slug} href={`/features/${f.slug}`} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14.5px] hover:bg-[var(--panel2)]">
+                  <Icon name={f.icon} size={17} className="text-brand-500" />{f.name}
+                </Link>
+              ))}
+              <div className="hairline my-3" />
+              {[["All features", "/features"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"], ["Contact", "/contact"]].map(([l, h]) => (
+                <Link key={h} href={h} className="block rounded-lg px-3 py-2.5 text-[15px] font-medium hover:bg-[var(--panel2)]">{l}</Link>
               ))}
             </div>
-          </details>
+            <div className="mt-auto grid gap-2 border-t line p-4">
+              <Link href="/signup" className="btn btn-brand w-full py-3">Start free <Icon name="ArrowRight" size={15} /></Link>
+              <Link href="/login" className="btn w-full py-3">Log in</Link>
+            </div>
+          </MobileDrawer>
         </div>
       </div>
     </header>
@@ -48,12 +59,12 @@ export function MarketingHeader() {
 
 export function MarketingFooter() {
   return (
-    <footer className="mt-32 border-t line">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-5">
-        <div className="md:col-span-2">
+    <footer className="mt-20 border-t line sm:mt-32">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-10 px-4 py-12 sm:px-6 sm:py-14 md:grid-cols-5">
+        <div className="col-span-2">
           <Logo size={24} />
           <p className="muted mt-4 max-w-xs text-sm leading-relaxed">AI SEO audits, rank tracking, competitor analysis and fixes that ship, in one place.</p>
-          <a className="muted mt-4 inline-flex items-center gap-2 text-sm hover:text-[var(--ink)]" href={`mailto:${config.supportEmail}`}><Icon name="Mail" size={15} />{config.supportEmail}</a>
+          <a className="muted mt-4 inline-flex items-center gap-2 break-all text-sm hover:text-[var(--ink)]" href={`mailto:${config.supportEmail}`}><Icon name="Mail" size={15} />{config.supportEmail}</a>
         </div>
         <FooterCol title="Product" links={[...FEATURES.map((f) => [f.name, `/features/${f.slug}`] as [string, string]), ["Pricing", "/pricing"]]} />
         <FooterCol title="Resources" links={[["Blog", "/blog"], ["RSS", "/blog/rss.xml"], ["llms.txt", "/llms.txt"], ["Sitemap", "/sitemap.xml"]]} />
@@ -85,22 +96,22 @@ export function SectionHead({ eyebrow, title, text, center = false }: { eyebrow?
   return (
     <div className={center ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
       {eyebrow && <div className="mb-3 text-[13px] font-semibold text-brand-500">{eyebrow}</div>}
-      <h2 className="text-gradient text-3xl font-semibold tracking-[-0.03em] sm:text-[2.6rem] sm:leading-[1.1]">{title}</h2>
-      {text && <p className="muted mt-4 text-[17px] leading-relaxed">{text}</p>}
+      <h2 className="text-gradient text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] sm:text-[2.6rem] sm:leading-[1.1]">{title}</h2>
+      {text && <p className="muted mt-4 text-[15.5px] leading-relaxed sm:text-[17px]">{text}</p>}
     </div>
   );
 }
 
 export function CtaBand({ title = "See what is holding your website back", text = "Free plan, no card. Your first audit takes a couple of minutes.", button = "Start free" }: { title?: string; text?: string; button?: string }) {
   return (
-    <section className="mx-auto mt-32 max-w-6xl px-4 sm:px-6">
-      <div className="panel relative overflow-hidden px-6 py-16 text-center sm:px-16">
+    <section className="mx-auto mt-20 max-w-6xl px-4 sm:mt-32 sm:px-6">
+      <div className="panel relative overflow-hidden px-5 py-12 text-center sm:px-16 sm:py-16">
         <div className="grid-bg pointer-events-none absolute inset-0" />
         <div className="glow-top pointer-events-none absolute inset-0" />
         <div className="relative">
-          <h2 className="text-gradient mx-auto max-w-2xl text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">{title}</h2>
-          <p className="muted mx-auto mt-4 max-w-lg text-[17px]">{text}</p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <h2 className="text-gradient mx-auto max-w-2xl text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] sm:text-5xl">{title}</h2>
+          <p className="muted mx-auto mt-4 max-w-lg text-[15.5px] sm:text-[17px]">{text}</p>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
             <Link href="/signup" className="btn btn-brand px-5 py-3 text-[15px]">{button} <Icon name="ArrowRight" size={16} /></Link>
             <Link href="/pricing" className="btn px-5 py-3 text-[15px]">See pricing</Link>
           </div>
@@ -115,7 +126,7 @@ export function FaqList({ faqs }: { faqs: { q: string; a: string }[] }) {
     <div className="divide-y line border-y line">
       {faqs.map((f) => (
         <details key={f.q} className="group py-5">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-[16px] font-medium">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-medium sm:gap-6 sm:text-[16px]">
             {f.q}
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border line transition group-open:rotate-45"><Icon name="Plus" size={14} /></span>
           </summary>

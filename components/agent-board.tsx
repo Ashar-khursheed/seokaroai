@@ -84,17 +84,17 @@ export function AgentBoard({ runId, running, agents, doneFiles }: { runId: strin
 
   return (
     <div className="space-y-5">
-      <div className="panel overflow-hidden p-5">
+      <div className="panel overflow-hidden p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="relative grid h-10 w-10 place-items-center rounded-xl border line text-brand-500">
+          <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-xl border line text-brand-500">
             <Icon name="BrainCircuit" size={19} />
             {running && <span className="live-dot absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-brand-500" />}
           </span>
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <div className="font-semibold">{running ? "Your agent team is working" : "Agent team"}</div>
             <div className="muted text-[13px]">{done} of {total} done{running && working ? ` · ${working} working now` : ""}{skipped ? ` · ${skipped} not needed for this site` : ""}</div>
           </div>
-          <div className="text-2xl font-semibold tabular-nums">{pct}%</div>
+          <div className="shrink-0 text-2xl font-semibold tabular-nums">{pct}%</div>
         </div>
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[var(--panel2)]">
           <div className={`h-full rounded-full bg-gradient-to-r from-brand-500 to-teal-400 transition-[width] duration-700 ${running ? "progress-glow" : ""}`} style={{ width: `${Math.max(pct, running ? 3 : 0)}%` }} />
@@ -108,13 +108,13 @@ export function AgentBoard({ runId, running, agents, doneFiles }: { runId: strin
             {agents.filter((a) => a.phase === ph).map((a) => {
               const s = state.get(a.id)!;
               return (
-                <div key={a.id} className={`agent-card panel relative p-4 ${s.status === "working" && running ? "is-working" : ""} ${s.status === "waiting" || s.status === "skipped" ? "opacity-55" : ""}`}>
+                <div key={a.id} className={`agent-card panel relative min-w-0 p-3.5 sm:p-4 ${s.status === "working" && running ? "is-working" : ""} ${s.status === "waiting" || s.status === "skipped" ? "opacity-55" : ""}`}>
                   <div className="flex items-start gap-3">
                     <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border line ${s.status === "done" ? "bg-low/10 text-low" : "text-brand-500"}`}>
                       <Icon name={s.status === "done" ? "Check" : a.icon} size={16} />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                         <span className="truncate text-[14px] font-medium">{a.name}</span>
                         {a.when && <span className="muted text-[11px]">for {a.when}</span>}
                       </div>
@@ -125,7 +125,7 @@ export function AgentBoard({ runId, running, agents, doneFiles }: { runId: strin
                       </div>
                     </div>
                   </div>
-                  <p className={`mt-3 line-clamp-2 min-h-[2.5em] font-mono text-[11.5px] leading-snug ${s.status === "working" ? "" : "muted"}`}>
+                  <p className={`mt-3 line-clamp-2 min-h-[2.5em] break-words font-mono text-[11.5px] leading-snug ${s.status === "working" ? "" : "muted"}`}>
                     {s.status === "working" && s.last ? s.last : a.role}
                   </p>
                   {s.status === "working" && running && <div className="agent-shimmer mt-3 h-1 rounded-full" />}

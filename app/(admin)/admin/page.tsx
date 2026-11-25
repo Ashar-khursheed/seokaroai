@@ -50,9 +50,9 @@ export default async function AdminHome() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-[-0.02em]">Overview · {since.toLocaleString("en-US", { month: "long", year: "numeric" })}</h1>
-        <form action={runAutomationsNow}><SubmitButton className="btn" pendingText="Running…">Run automations now</SubmitButton></form>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em]">Overview · {since.toLocaleString("en-US", { month: "long", year: "numeric" })}</h1>
+        <form action={runAutomationsNow}><SubmitButton className="btn w-full sm:w-auto" pendingText="Running…">Run automations now</SubmitButton></form>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi label="MRR (estimate)" value={`$${mrr.toFixed(0)}`} sub={`${paidCount} paying customers`} />
@@ -60,36 +60,36 @@ export default async function AdminHome() {
         <Kpi label="Gross margin (estimate)" value={mrr ? `${Math.round(((mrr - cost) / mrr) * 100)}%` : "–"} sub="MRR minus AI and data cost" />
         <Kpi label="Users" value={String(users.n)} sub={`${verified.n} confirmed · ${newUsers.n} new this month`} />
       </div>
-      <div className="grid gap-6 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <Card title="Runs this month">
-          <table className="w-full text-sm"><tbody>{kinds.map((k) => (
-            <tr key={k.k} className="border-b line last:border-0"><td className="py-2">{KIND_LABEL[k.k]}</td><td className="text-right">{k.done} done</td><td className="text-right text-rose-600">{k.failed} failed</td></tr>
-          ))}</tbody></table>
+          <div className="table-wrap"><table className="w-full text-sm"><tbody>{kinds.map((k) => (
+            <tr key={k.k} className="border-b line last:border-0"><td className="py-2 pr-3">{KIND_LABEL[k.k]}</td><td className="pr-3 text-right">{k.done} done</td><td className="text-right text-rose-600">{k.failed} failed</td></tr>
+          ))}</tbody></table></div>
         </Card>
         <Card title="Plans">
-          <table className="w-full text-sm"><tbody>{Object.values(PLANS).filter((p) => p.code !== "free").map((p) => {
+          <div className="table-wrap"><table className="w-full text-sm"><tbody>{Object.values(PLANS).filter((p) => p.code !== "free").map((p) => {
             const n = paid.filter((x) => x.plan === p.code).reduce((a, x) => a + Number(x.n), 0);
-            return <tr key={p.code} className="border-b line last:border-0"><td className="py-2">{p.name}</td><td className="text-right">{n} customers</td></tr>;
-          })}</tbody></table>
+            return <tr key={p.code} className="border-b line last:border-0"><td className="py-2 pr-3">{p.name}</td><td className="text-right">{n} customers</td></tr>;
+          })}</tbody></table></div>
           <Link href="/admin/messages" className="mt-3 inline-block text-sm text-brand-500">{unread.n} unread messages →</Link>
         </Card>
         <Card title="Setup checklist">
           <ul className="space-y-2 text-sm">{checks.map(([l, ok, hint]) => (
-            <li key={l} className="flex gap-2"><span className={ok ? "text-emerald-600" : "text-rose-600"}>{ok ? "✓" : "✗"}</span><span><b>{l}</b><br /><span className="muted text-xs">{hint}</span></span></li>
+            <li key={l} className="flex gap-2"><span className={`shrink-0 ${ok ? "text-emerald-600" : "text-rose-600"}`}>{ok ? "✓" : "✗"}</span><span className="min-w-0 break-words"><b>{l}</b><br /><span className="muted text-xs">{hint}</span></span></li>
           ))}</ul>
         </Card>
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
         <Card title="Newest users">
-          <table className="w-full text-sm"><tbody>{recent.map((u) => (
-            <tr key={u.id} className="border-b line last:border-0"><td className="py-2">{u.email}<div className="muted text-xs">{u.name}</div></td><td>{getPlan(u.plan).name}</td><td className="muted text-right text-xs">{timeAgo(u.createdAt)}</td></tr>
-          ))}</tbody></table>
+          <div className="table-wrap"><table className="w-full text-sm"><tbody>{recent.map((u) => (
+            <tr key={u.id} className="border-b line last:border-0"><td className="wrap min-w-[10rem] break-all py-2 pr-3">{u.email}<div className="muted break-words text-xs">{u.name}</div></td><td className="pr-3">{getPlan(u.plan).name}</td><td className="muted text-right text-xs">{timeAgo(u.createdAt)}</td></tr>
+          ))}</tbody></table></div>
         </Card>
         <Card title="Recent failures">
           {failing.length === 0 ? <p className="muted text-sm">No failed runs this month.</p> : (
-            <table className="w-full text-sm"><tbody>{failing.map((r) => (
-              <tr key={r.id} className="border-b line align-top last:border-0"><td className="py-2"><Link href={`/app/runs/${encodeURIComponent(r.id)}`} className="hover:text-brand-500">{r.title}</Link><div className="text-xs text-rose-600">{r.error?.slice(0, 140)}</div></td><td><StatusPill status={r.status} /></td></tr>
-            ))}</tbody></table>
+            <div className="table-wrap"><table className="w-full text-sm"><tbody>{failing.map((r) => (
+              <tr key={r.id} className="border-b line align-top last:border-0"><td className="wrap min-w-[12rem] py-2 pr-3"><Link href={`/app/runs/${encodeURIComponent(r.id)}`} className="hover:text-brand-500">{r.title}</Link><div className="break-words text-xs text-rose-600">{r.error?.slice(0, 140)}</div></td><td><StatusPill status={r.status} /></td></tr>
+            ))}</tbody></table></div>
           )}
         </Card>
       </div>
@@ -98,5 +98,5 @@ export default async function AdminHome() {
 }
 
 function Kpi({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return <div className="panel p-5"><div className="muted text-xs font-bold uppercase tracking-wider">{label}</div><div className="mt-1 text-3xl font-semibold tracking-[-0.02em]">{value}</div><div className="muted mt-1 text-xs">{sub}</div></div>;
+  return <div className="panel min-w-0 p-4 sm:p-5"><div className="muted text-xs font-bold uppercase tracking-wider">{label}</div><div className="mt-1 text-3xl font-semibold tracking-[-0.02em]">{value}</div><div className="muted mt-1 text-xs">{sub}</div></div>;
 }

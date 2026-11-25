@@ -11,13 +11,13 @@ export const metadata: Metadata = {
 
 export default function Contact() {
   return (
-    <section className="mx-auto grid max-w-5xl gap-10 px-4 pt-16 sm:px-6 md:grid-cols-[1fr_1.2fr]">
-      <div>
-        <h1 className="text-4xl font-semibold tracking-[-0.03em]">Talk to us</h1>
-        <p className="muted mt-4 text-lg leading-relaxed">Questions about plans, agency pricing, or an audit that did not look right? We read every message.</p>
-        <p className="mt-6">Email: <a className="font-semibold text-brand-500" href={`mailto:${config.supportEmail}`}>{config.supportEmail}</a></p>
+    <section className="mx-auto grid max-w-5xl gap-8 px-4 pt-10 sm:gap-10 sm:px-6 sm:pt-16 md:grid-cols-[1fr_1.2fr]">
+      <div className="min-w-0">
+        <h1 className="break-words text-[2rem] font-semibold leading-tight tracking-[-0.03em] sm:text-4xl">Talk to us</h1>
+        <p className="muted mt-4 text-base leading-relaxed sm:text-lg">Questions about plans, agency pricing, or an audit that did not look right? We read every message.</p>
+        <p className="mt-6 break-words">Email: <a className="break-all font-semibold text-brand-500" href={`mailto:${config.supportEmail}`}>{config.supportEmail}</a></p>
       </div>
-      <div className="panel p-6">
+      <div className="panel min-w-0 p-5 sm:p-6">
         <ActionForm action={sendContact} resetOnOk>
           <label className="block"><span className="mb-1 block text-sm font-semibold">Name</span><input name="name" required maxLength={120} className="input" autoComplete="name" /></label>
           <label className="block"><span className="mb-1 block text-sm font-semibold">Email</span><input name="email" type="email" required className="input" autoComplete="email" /></label>

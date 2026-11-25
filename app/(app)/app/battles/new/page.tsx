@@ -22,7 +22,7 @@ export default async function NewBattle({ searchParams }: { searchParams: Promis
     <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-semibold tracking-[-0.02em]">Keyword battle</h1>
       <p className="muted mt-1">We measure the top 3 Google results for your keyword and your page in exactly the same way, then list what to change, with the competitor evidence for each recommendation. Takes 5 to 15 minutes.</p>
-      <div className="panel mt-6 p-6">
+      <div className="panel mt-6 p-4 sm:p-6">
         <ActionForm action={startBattle}>
           <label className="block"><span className="mb-1 block text-sm font-semibold">Keyword</span>
             <input name="keyword" required maxLength={200} defaultValue={sp.keyword ?? ""} className="input" placeholder="commercial coffee machine dubai" /></label>
@@ -47,8 +47,8 @@ export default async function NewBattle({ searchParams }: { searchParams: Promis
               {user.role === "admin" && <> Connect DataForSEO in <a href="/admin/integrations" className="font-medium text-brand-500 underline">Admin → Integrations</a> to use the live Google top 10.</>}
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-3">
-            <SubmitButton className="btn btn-primary" pendingText="Starting…">Start battle</SubmitButton>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Starting…">Start battle</SubmitButton>
             <span className="muted text-sm">{left > 0 ? `${left} of ${plan.limits.battles} left this month` : <>No battles left this month · <Link href="/app/billing" className="text-brand-500">upgrade</Link></>}</span>
           </div>
         </ActionForm>

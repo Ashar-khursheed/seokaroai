@@ -66,9 +66,9 @@ export function StatusPill({ status }: { status: string }) {
 
 export function Card({ title, action, children, className = "" }: { title?: React.ReactNode; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`panel min-w-0 p-5 ${className}`}>
+    <section className={`panel min-w-0 p-4 sm:p-5 ${className}`}>
       {(title || action) && (
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           {title && <h3 className="text-[13px] font-medium text-[var(--muted)]">{title}</h3>}
           {action}
         </div>
@@ -80,9 +80,9 @@ export function Card({ title, action, children, className = "" }: { title?: Reac
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: React.ReactNode; actions?: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h1 className="text-[26px] font-semibold tracking-[-0.03em]">{title}</h1>
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+      <div className="min-w-0">
+        <h1 className="break-words text-[22px] sm:text-[26px] font-semibold tracking-[-0.03em]">{title}</h1>
         {subtitle && <p className="muted mt-1 text-[14px]">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -193,7 +193,7 @@ export function Empty({ icon = "Sparkles", title, text, action }: { icon?: strin
   // icon rendered by caller-provided element to keep this file free of client/icon imports
   void icon;
   return (
-    <div className="grid place-items-center px-6 py-14 text-center">
+    <div className="grid place-items-center px-4 py-10 text-center sm:px-6 sm:py-14">
       <div className="text-[15px] font-medium">{title}</div>
       {text && <p className="muted mt-1.5 max-w-sm text-[14px]">{text}</p>}
       {action && <div className="mt-5">{action}</div>}

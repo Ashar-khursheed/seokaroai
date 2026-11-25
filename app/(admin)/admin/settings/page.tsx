@@ -25,10 +25,10 @@ export default async function AdminSettings() {
             ] as const).map(([v, label, d, ok, env]) => (
               <label key={v} className="panel flex cursor-pointer gap-3 p-4 has-[:checked]:border-brand-500 has-[:checked]:shadow-[0_0_0_1px_var(--color-brand-500)]">
                 <input type="radio" name="provider" value={v} defaultChecked={ai.provider === v} className="mt-1 accent-[#1f86ff]" />
-                <span>
+                <span className="min-w-0 break-words">
                   <span className="block font-medium">{label}</span>
                   <span className="muted mt-1 block text-[13px] leading-snug">{d}</span>
-                  <span className={`mt-2 flex items-center gap-1.5 text-[12px] ${ok ? "text-low" : "text-crit"}`}><Icon name={ok ? "CircleCheck" : "CircleAlert"} size={13} />{ok ? `${env} set` : `${env} missing in .env.local`}</span>
+                  <span className={`mt-2 flex items-center gap-1.5 text-[12px] ${ok ? "text-low" : "text-crit"}`}><Icon name={ok ? "CircleCheck" : "CircleAlert"} size={13} className="shrink-0" />{ok ? `${env} set` : `${env} missing in .env.local`}</span>
                 </span>
               </label>
             ))}
@@ -44,7 +44,7 @@ export default async function AdminSettings() {
               <span className="muted mt-1 block text-[12px]">Reads the collected findings in a fresh conversation and writes the competitor gaps, plans and reports for deep audits and keyword battles.</span></label>
           </div>
           <div>
-            <p className="mb-2 text-[13px] font-medium">OpenAI price, USD per 1M tokens <span className="muted font-normal">(used to meter the spend cap; blank uses {price.input}/{price.cachedInput}/{price.output} for {ai.openaiModel})</span></p>
+            <p className="mb-2 break-words text-[13px] font-medium">OpenAI price, USD per 1M tokens <span className="muted font-normal">(used to meter the spend cap; blank uses {price.input}/{price.cachedInput}/{price.output} for {ai.openaiModel})</span></p>
             <div className="grid gap-3 sm:grid-cols-3">
               {([["priceInput", "Input", ai.openaiPrice?.input], ["priceCached", "Cached input", ai.openaiPrice?.cachedInput], ["priceOutput", "Output", ai.openaiPrice?.output]] as const).map(([n, l, v]) => (
                 <label key={n} className="block"><span className="muted mb-1 block text-[12px]">{l}</span>
@@ -53,15 +53,15 @@ export default async function AdminSettings() {
             </div>
             <p className="muted mt-2 text-[12px]">Every AI run stops at its plan&apos;s spend cap and never above ${MAX_RUN_USD}. Deep audit: Starter $2.50, Pro/Agency $3. Keyword battle $1. Code fix $0.50 to $1.</p>
           </div>
-          <SubmitButton className="btn btn-primary" pendingText="Saving…">Save AI settings</SubmitButton>
+          <SubmitButton className="btn btn-primary w-full sm:w-auto" pendingText="Saving…">Save AI settings</SubmitButton>
         </ActionForm>
       </Card>
       <Card title="Connectors">
         <ul className="space-y-2 text-[14px]">
-          <li className="flex gap-2"><Icon name="CircleCheck" size={16} className="text-low" />WordPress, Shopify and GitHub connectors are available to every customer.</li>
-          <li className="flex gap-2"><Icon name={localFoldersAllowed() ? "CircleCheck" : "CircleAlert"} size={16} className={localFoldersAllowed() ? "text-low" : "muted"} />
-            Server folders are {localFoldersAllowed() ? "enabled (admins only)" : "disabled"}. Set ALLOW_LOCAL_FOLDERS=1 on a self-hosted install to let admins connect a folder on this server.</li>
-          <li className="flex gap-2"><Icon name="Lock" size={16} className="muted" />Connector secrets are encrypted with ENCRYPTION_KEY (falls back to SESSION_SECRET). Changing it means reconnecting.</li>
+          <li className="flex gap-2"><Icon name="CircleCheck" size={16} className="mt-0.5 shrink-0 text-low" /><span className="min-w-0 break-words">WordPress, Shopify and GitHub connectors are available to every customer.</span></li>
+          <li className="flex gap-2"><Icon name={localFoldersAllowed() ? "CircleCheck" : "CircleAlert"} size={16} className={localFoldersAllowed() ? "mt-0.5 shrink-0 text-low" : "mt-0.5 shrink-0 muted"} />
+            <span className="min-w-0 break-words">Server folders are {localFoldersAllowed() ? "enabled (admins only)" : "disabled"}. Set ALLOW_LOCAL_FOLDERS=1 on a self-hosted install to let admins connect a folder on this server.</span></li>
+          <li className="flex gap-2"><Icon name="Lock" size={16} className="mt-0.5 shrink-0 muted" /><span className="min-w-0 break-words">Connector secrets are encrypted with ENCRYPTION_KEY (falls back to SESSION_SECRET). Changing it means reconnecting.</span></li>
         </ul>
       </Card>
     </div>
