@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const target = url.searchParams.get('url') || config.appUrl;
-  const key = config.googleApiKey || process.env.GOOGLE_API_KEY;
+  const key = config.googleApiKey || process.env.GOOGLE_API_KEY || '';
   if (!key) {
     return new NextResponse(JSON.stringify({ error: 'Missing GOOGLE_API_KEY. Set the GOOGLE_API_KEY environment variable in your deployment.' }), { status: 501, headers: { 'Content-Type': 'application/json' } });
   }
