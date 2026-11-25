@@ -22,6 +22,7 @@ export const config = {
   launcher: '"$HOME/.claude/skills/seo/scripts/claude-seo"',
   launcherPath: env.CLAUDE_SEO_LAUNCHER || path.join(os.homedir(), ".claude", "skills", "seo", "scripts", "claude-seo"),
   googleApiKey: env.GOOGLE_API_KEY || "",
+  cruxApiKey: env.CRUX_API_KEY || "",
 
   dataforseo:
     env.DATAFORSEO_LOGIN && env.DATAFORSEO_PASSWORD

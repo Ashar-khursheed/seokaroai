@@ -9,7 +9,7 @@ import { Icon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: { absolute: "SEOKaroAI: AI SEO Audit Tool, Rank Tracker & Auto-Fix" },
-  description: "Audit your website with a team of AI SEO agents, track Google rankings daily, see what the top 3 results do that you don't, and fix issues directly in WordPress, Shopify or GitHub. Free plan.",
+  description: "AI SEO audit tool that audits your site, tracks rankings, and ships fixes to WordPress, Shopify or GitHub. Start a free audit.",
   alternates: { canonical: "/" },
 };
 
@@ -149,15 +149,13 @@ export default function Home() {
       <section className="mx-auto mt-20 sm:mt-32 max-w-6xl px-4 sm:px-6">
         <Reveal><SectionHead eyebrow="Platform" title="Everything an SEO team does, run by agents you can supervise." text="From the first crawl to the merged pull request, every step is measured, explained and reversible." /></Reveal>
         <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-2 md:grid-cols-6">
-          <Reveal className="sm:col-span-2 md:col-span-4 md:row-span-2">
-            <Spotlight className="panel card-hover h-full p-5 sm:p-8">
+          <Reveal><Spotlight className="panel card-hover h-full p-5 sm:p-8">
               <Icon name={main.icon} size={22} className="text-brand-500" />
               <h3 className="mt-5 text-xl sm:text-2xl font-semibold tracking-tight">{main.h1}</h3>
               <p className="muted mt-3 max-w-xl leading-relaxed">{main.intro}</p>
               <ul className="mt-6 grid gap-3 sm:grid-cols-2">{main.bullets.map((b) => <li key={b} className="flex gap-2.5 text-[14px]"><Icon name="Check" size={16} className="mt-0.5 shrink-0 text-low" />{b}</li>)}</ul>
-              <Link href={`/features/${main.slug}`} className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-brand-500">Learn more <Icon name="ArrowRight" size={14} /></Link>
-            </Spotlight>
-          </Reveal>
+              <Link href={`/features/${main.slug}`} className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-brand-500">Learn about AI Auto-Fix <Icon name="ArrowRight" size={14} /></Link>
+            </Spotlight></Reveal>
           {rest.map((f, i) => (
             <Reveal key={f.slug} delay={i * 60} className="sm:col-span-1 md:col-span-2">
               <Spotlight className="panel card-hover h-full">

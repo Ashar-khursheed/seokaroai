@@ -6,7 +6,7 @@ import { CtaBand, FaqList, JsonLd } from "@/components/marketing";
 
 export const metadata: Metadata = {
   title: "Pricing: Free, Starter, Pro and Agency Plans",
-  description: "SEOKaroAI pricing. Start free, then choose Starter, Pro or Agency for AI deep audits, keyword battles, daily rank tracking and more websites. Save 2 months with yearly billing.",
+  description: "SEOKaroAI plans: start free, then upgrade for AI deep audits, keyword battles, and daily rank tracking. Try a free audit today.",
   alternates: { canonical: "/pricing" },
 };
 

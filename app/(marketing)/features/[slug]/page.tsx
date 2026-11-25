@@ -7,6 +7,10 @@ import { CtaBand, FaqList, JsonLd, SectionHead } from "@/components/marketing";
 import { Reveal, Spotlight } from "@/components/motion";
 import { Icon } from "@/components/icons";
 
+// Instant checker is a client component loaded only on the website SEO checker page
+import dynamic from "next/dynamic";
+const InstantChecker = dynamic(() => import("@/components/instant-checker"), { ssr: false });
+
 export function generateStaticParams() {
   return FEATURES.map((f) => ({ slug: f.slug }));
 }
@@ -14,7 +18,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const f = featureBySlug((await params).slug);
   if (!f) return {};
-  return { title: f.metaTitle, description: f.metaDescription, alternates: { canonical: `/features/${f.slug}` }, openGraph: { title: f.metaTitle, description: f.metaDescription } };
+  return { title: f.metaTitle, description: f.metaDescription, alternates: { canonical: `/features/${f.slug}` }, openGraph: { title: f.metaTitle, description: f.metaDescription, images: [`${config.appUrl}/opengraph-image`] } };
 }
 
 export default async function FeaturePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -43,6 +47,15 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
     ],
   };
 
+  const pageStructured = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: f.name,
+    url: `${config.appUrl}/features/${f.slug}`,
+    description: f.metaDescription,
+    image: `${config.appUrl}/opengraph-image`,
+  };
+
   return (
     <>
       <JsonLd data={[
@@ -52,6 +65,7 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
           { "@type": "ListItem", position: 3, name: f.name },
         ] },
         appStructured,
+        pageStructured,
         faqStructured,
       ]} />
 
@@ -86,6 +100,14 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
             <img src="/brand/logo-mark-256.png" alt={`Annotated example report for ${f.name}`} width={420} height={240} />
             <img src="/brand/logo-mark-128.webp" alt={`Comparison table example for ${f.name}`} width={420} height={240} />
           </div>
+
+          {/* Instant checker for the free checker page */}
+          {f.slug === "website-seo-checker" && (
+            <div className="mt-8">
+              {/* @ts-ignore - client component loaded dynamically */}
+              <InstantChecker />
+            </div>
+          )}
         </div>
       </section>
 
