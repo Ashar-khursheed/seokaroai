@@ -93,7 +93,7 @@ export function LiveLog({ id, running, compact = false }: { id: string; running:
         </div>
       )}
       <div ref={box} className={`panel2 overflow-auto rounded-xl border line p-3 font-mono text-[12.5px] leading-relaxed ${compact ? "max-h-64" : "max-h-[70vh]"}`}>
-        {shown.length === 0 && <div className="muted">Waiting for the worker to pick this up…</div>}
+        {shown.length === 0 && <div className="muted">{running ? "Waiting for the worker to pick this up…" : "No activity log is available for this run."}</div>}
         {shown.map((e, i) => (
           <div key={i} className={`whitespace-pre-wrap break-words ${KIND_STYLE[e.kind] ?? ""}`}>
             <span className="muted mr-2">{new Date(e.t).toLocaleTimeString()}</span>

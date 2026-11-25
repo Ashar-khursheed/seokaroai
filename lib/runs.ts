@@ -23,6 +23,7 @@ import { sendMail } from "@/lib/email";
 import { runDoneEmail } from "@/lib/email/templates";
 import { effectivePlan } from "@/lib/plans";
 import { readJson, runFolder, type AuditInput, type KeywordInput } from "@/lib/files";
+import { saveRunFilesToDb } from "@/lib/run-files";
 import { aiAllowance, type RunKind } from "@/lib/usage";
 import { budgetAlerts } from "@/lib/budget-alerts";
 import type { Run } from "@/lib/db/schema";
@@ -143,6 +144,7 @@ export async function executeRun(run: Run, workerId: string) {
     status, error, score, summary: JSON.stringify(summary), costUsd: cost, turns, finishedAt: new Date(), heartbeatAt: new Date(),
   }).where(eq(schema.runs.id, run.id));
   emit(run.id, { kind: status === "done" ? "done" : "error", text: status === "done" ? `Finished${cost != null ? ` · $${cost.toFixed(2)}` : ""}` : `${status}: ${error ?? ""}` });
+  await saveRunFilesToDb(run.id).catch((e) => console.error("[runs] saveRunFilesToDb", e));
   l.emitter.emit("end");
   live.delete(run.id);
   await afterRun(run, status, score, summary).catch((e) => console.error("[runs] afterRun", e));

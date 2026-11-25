@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { notFound } from "next/navigation";
 import { ownedRun } from "@/lib/access";
 import { runFolder } from "@/lib/files";
+import { ensureRunFiles } from "@/lib/run-files";
 import { AutoRefresh } from "@/components/client";
 import { AuditView } from "@/components/report/audit-view";
 import { KeywordView } from "@/components/report/keyword-view";
@@ -20,8 +21,9 @@ export default async function RunPage({ params, searchParams }: { params: Promis
   const { view, file } = await searchParams;
   const dir = runFolder(id);
   fs.mkdirSync(dir, { recursive: true });
-  const props = { run: found.run, dir, view, file };
   const running = found.run.status === "running" || found.run.status === "queued";
+  if (!running) await ensureRunFiles(id);
+  const props = { run: found.run, dir, view, file };
   return (
     <>
       <AutoRefresh active={running} ms={20000} />

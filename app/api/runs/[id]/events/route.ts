@@ -3,6 +3,7 @@ import path from "node:path";
 import { ownedRun } from "@/lib/access";
 import { getLive, type RunEvent } from "@/lib/runs";
 import { runFolder } from "@/lib/files";
+import { ensureRunFiles } from "@/lib/run-files";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,6 +13,10 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const { id } = await ctx.params;
   const found = await ownedRun(id);
   if (!found) return new Response("Not found", { status: 404 });
+  const eventsPath = path.join(runFolder(id), "events.jsonl");
+  if (!getLive(id) && !fs.existsSync(eventsPath)) {
+    await ensureRunFiles(id, { onlyPath: "events.jsonl" });
+  }
   const enc = new TextEncoder();
   const stream = new ReadableStream({
     start(controller) {

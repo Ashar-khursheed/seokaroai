@@ -1,10 +1,11 @@
-import { bigint, datetime, decimal, int, mediumtext, mysqlTable, text, tinyint, varchar, char } from "drizzle-orm/mysql-core";
+import { bigint, customType, datetime, decimal, int, mediumtext, mysqlTable, primaryKey, text, tinyint, varchar, char } from "drizzle-orm/mysql-core";
 
-/** Drizzle mapping of migrations/0001_init.sql. Change both together. */
+/** Drizzle mapping of migrations/*.sql. Change both together. */
 
 const id = () => bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey();
 const fk = (name: string) => bigint(name, { mode: "number", unsigned: true });
 const dt = (name: string) => datetime(name, { mode: "date", fsp: 3 });
+const longblob = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => "longblob" });
 
 export const users = mysqlTable("users", {
   id: id(),
@@ -214,5 +215,18 @@ export const fixChanges = mysqlTable("fix_changes", {
   createdAt: dt("created_at").notNull(),
 });
 
+export const runFiles = mysqlTable(
+  "run_files",
+  {
+    runId: varchar("run_id", { length: 100 }).notNull(),
+    path: varchar("path", { length: 255 }).notNull(),
+    content: longblob("content").notNull(),
+    size: int("size", { unsigned: true }).notNull().default(0),
+    updatedAt: dt("updated_at").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.runId, t.path] })],
+);
+
 export type Connector = typeof connectors.$inferSelect;
 export type FixChange = typeof fixChanges.$inferSelect;
+export type RunFile = typeof runFiles.$inferSelect;
