@@ -33,24 +33,26 @@ export function MarketingHeader() {
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <Link href="/login" className="btn btn-ghost hidden sm:inline-flex">Log in</Link>
           <Link href="/signup" className="btn btn-primary !px-3 sm:!px-[15px]">Start free <Icon name="ArrowRight" size={15} className="hidden min-[380px]:block" /></Link>
-          <MobileDrawer className="md:hidden" title={<Logo size={22} />}>
-            <div className="p-3">
-              <div className="muted px-3 pb-2 pt-1 text-[11px] font-medium uppercase tracking-wider">Product</div>
-              {FEATURES.map((f) => (
-                <Link key={f.slug} href={`/features/${f.slug}`} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14.5px] hover:bg-[var(--panel2)]">
-                  <Icon name={f.icon} size={17} className="text-brand-500" />{f.name}
-                </Link>
-              ))}
-              <div className="hairline my-3" />
-              {[["All features", "/features"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"], ["Contact", "/contact"]].map(([l, h]) => (
-                <Link key={h} href={h} className="block rounded-lg px-3 py-2.5 text-[15px] font-medium hover:bg-[var(--panel2)]">{l}</Link>
-              ))}
-            </div>
-            <div className="mt-auto grid gap-2 border-t line p-4">
-              <Link href="/signup" className="btn btn-brand w-full py-3">Start free <Icon name="ArrowRight" size={15} /></Link>
-              <Link href="/login" className="btn w-full py-3">Log in</Link>
-            </div>
-          </MobileDrawer>
+          <div className="md:hidden">
+            <MobileDrawer title={<Logo size={22} />}>
+              <div className="p-3">
+                <div className="muted px-3 pb-2 pt-1 text-[11px] font-medium uppercase tracking-wider">Product</div>
+                {FEATURES.map((f) => (
+                  <Link key={f.slug} href={`/features/${f.slug}`} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14.5px] hover:bg-[var(--panel2)]">
+                    <Icon name={f.icon} size={17} className="text-brand-500" />{f.name}
+                  </Link>
+                ))}
+                <div className="hairline my-3" />
+                {[["All features", "/features"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"], ["Contact", "/contact"]].map(([l, h]) => (
+                  <Link key={h} href={h} className="block rounded-lg px-3 py-2.5 text-[15px] font-medium hover:bg-[var(--panel2)]">{l}</Link>
+                ))}
+              </div>
+              <div className="mt-auto grid gap-2 border-t line p-4">
+                <Link href="/signup" className="btn btn-brand w-full py-3">Start free <Icon name="ArrowRight" size={15} /></Link>
+                <Link href="/login" className="btn w-full py-3">Log in</Link>
+              </div>
+            </MobileDrawer>
+          </div>
         </div>
       </div>
     </header>
