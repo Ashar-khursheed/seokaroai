@@ -35,10 +35,10 @@ export default async function IntegrationsPage() {
         <ActionForm action={savePaddle} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Environment">
-              <select name="env" defaultValue={p.env} className="input"><option value="sandbox">Sandbox (testing)</option><option value="production">Production (real payments)</option></select>
+              <select name="env" defaultValue={p.env} className="input"><option value="production">Production (real payments)</option><option value="sandbox">Sandbox (testing)</option></select>
             </Field>
-            <Secret label="API key" name="apiKey" value={p.apiKey} source={await src("paddle", "apiKey")} section="paddle" placeholder="pdl_sdbx_apikey_…" />
-            <Secret label="Client-side token" name="clientToken" value={p.clientToken} source={await src("paddle", "clientToken")} section="paddle" placeholder="test_…" reveal />
+            <Secret label="API key" name="apiKey" value={p.apiKey} source={await src("paddle", "apiKey")} section="paddle" placeholder="pdl_live_apikey_…" />
+            <Secret label="Client-side token" name="clientToken" value={p.clientToken} source={await src("paddle", "clientToken")} section="paddle" placeholder="live_…" reveal />
             <Secret label="Webhook secret" name="webhookSecret" value={p.webhookSecret} source={await src("paddle", "webhookSecret")} section="paddle" placeholder="pdl_ntfset_… secret, or the ntfset_… ID" />
           </div>
           <details className="rounded-xl border line p-4">

@@ -29,7 +29,7 @@ const e = process.env;
 function fromEnv(): Integrations {
   return {
     paddle: {
-      env: e.PADDLE_ENV === "production" ? "production" : "sandbox",
+      env: e.PADDLE_ENV === "sandbox" ? "sandbox" : "production",
       apiKey: e.PADDLE_API_KEY || "",
       clientToken: e.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || e.PADDLE_CLIENT_TOKEN || "",
       webhookSecret: e.PADDLE_WEBHOOK_SECRET || "",

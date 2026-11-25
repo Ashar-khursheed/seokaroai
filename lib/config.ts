@@ -40,7 +40,7 @@ export const config = {
   mailFrom: env.MAIL_FROM || "SEOKaroAI <no-reply@seokaroai.com>",
 
   paddle: {
-    env: (env.PADDLE_ENV === "production" ? "production" : "sandbox") as "production" | "sandbox",
+    env: (env.PADDLE_ENV === "sandbox" ? "sandbox" : "production") as "production" | "sandbox",
     apiKey: env.PADDLE_API_KEY || "",
     clientToken: env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || env.PADDLE_CLIENT_TOKEN || "",
     webhookSecret: env.PADDLE_WEBHOOK_SECRET || "",
