@@ -17,7 +17,7 @@ const CHECKS = ["Crawlability", "Indexing", "Canonicals", "Sitemaps", "robots.tx
 
 const STEPS = [
   { icon: "Globe", t: "Connect your site", d: "Add a URL and your keywords. Optionally connect WordPress, Shopify or GitHub." },
-  { icon: "Bot", t: "Agents audit and compare", d: "Specialist agents check every layer of SEO and measure you against the pages that outrank you." },
+  { icon: "Bot", t: "Agents audit and compare", d: "Specialist agents check every layer of SEO and measures you against the pages that outrank you." },
   { icon: "WandSparkles", t: "Review and ship fixes", d: "Approve the changes you want. CMS edits apply instantly; code arrives as a pull request." },
   { icon: "TrendingUp", t: "Watch it move", d: "Daily rank tracking, score history and a Monday report show what the work changed." },
 ];
@@ -25,11 +25,48 @@ const STEPS = [
 export default function Home() {
   const [main, ...others] = FEATURES;
   const rest = others.filter((f) => f.slug !== "website-seo-checker"); // keeps the bento grid even (5 small tiles)
+
+  const faqStructured = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: HOME_FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  const appStructured = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "SEOKaroAI",
+    url: config.appUrl,
+    description: "AI SEO audits, rank tracking, competitor analysis and fixes that ship, in one place.",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "All",
+    image: [
+      `${config.appUrl}/brand/logo-mark-512.png`,
+      `${config.appUrl}/brand/logo-mark-256.png`,
+      `${config.appUrl}/brand/logo-mark-128.webp`,
+    ],
+  };
+
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${config.appUrl}/` },
+    ],
+  };
+
   return (
     <>
       <JsonLd data={[
         { "@context": "https://schema.org", "@type": "Organization", "@id": `${config.appUrl}/#organization`, name: "SEOKaroAI", url: config.appUrl, logo: `${config.appUrl}/brand/logo-mark-512.png`, email: config.supportEmail },
         { "@context": "https://schema.org", "@type": "WebSite", "@id": `${config.appUrl}/#website`, name: "SEOKaroAI", url: config.appUrl, publisher: { "@id": `${config.appUrl}/#organization` } },
+        appStructured,
+        breadcrumb,
+        faqStructured,
       ]} />
 
       {/* Hero */}
@@ -141,7 +178,7 @@ export default function Home() {
           <Reveal>
             <SectionHead eyebrow="Keyword Battle" title="Stop guessing why competitors outrank you." text="Pick a keyword and your page. We measure the top 3 results and your page the same way, then every recommendation shows what a ranking competitor does and what you have today." />
             <ul className="mt-8 space-y-3.5">
-              {["Search intent and the page type that wins", "20+ signals side by side", "Subtopics the winners cover and you miss", "Ready-to-paste title, meta and outline"].map((x) => (
+              {['Search intent and the page type that wins', '20+ signals side by side', 'Subtopics the winners cover and you miss', 'Ready-to-paste title, meta and outline'].map((x) => (
                 <li key={x} className="flex gap-3 text-[15px]"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-low/15 text-low"><Icon name="Check" size={12} /></span>{x}</li>
               ))}
             </ul>
@@ -152,7 +189,7 @@ export default function Home() {
               <div className="table-wrap"><table className="w-full min-w-[440px] text-[13px]">
                 <thead><tr className="muted text-left text-[12px]"><th className="p-2 font-medium">Signal</th><th className="p-2 font-medium text-[var(--ink)]">You</th><th className="p-2 font-medium">#1</th><th className="p-2 font-medium">#2</th><th className="p-2 font-medium">#3</th></tr></thead>
                 <tbody>
-                  {[["Main content words", "420", "2,100", "1,800", "1,500", true], ["FAQ section", "No", "Yes", "Yes", "No", true], ["Comparison table", "No", "Yes", "Yes", "Yes", true], ["Product schema", "Yes", "Yes", "No", "Yes", false], ["Server response", "0.2s", "0.6s", "0.9s", "0.5s", false]].map(([s, a, b, c, d, gap]) => (
+                  {[['Main content words', '420', '2,100', '1,800', '1,500', true], ['FAQ section', 'No', 'Yes', 'Yes', 'No', true], ['Comparison table', 'No', 'Yes', 'Yes', 'Yes', true], ['Product schema', 'Yes', 'Yes', 'No', 'Yes', false], ['Server response', '0.2s', '0.6s', '0.9s', '0.5s', false]].map(([s, a, b, c, d, gap]) => (
                     <tr key={String(s)} className="border-t line">
                       <td className="p-2">{s}</td>
                       <td className="p-2"><span className={`rounded-md px-1.5 py-0.5 font-medium ${gap ? "bg-crit/10 text-crit" : "bg-low/10 text-low"}`}>{a}</span></td>
@@ -216,7 +253,7 @@ export default function Home() {
       <section className="mx-auto mt-20 max-w-6xl px-4 sm:mt-32 sm:px-6">
         <Reveal><SectionHead center eyebrow="Pricing" title="Start free. Grow when it pays." /></Reveal>
         <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-2 md:grid-cols-4">
-          {(["free", ...PAID_PLANS] as const).map((c, i) => {
+          {( ["free", ...PAID_PLANS] as const).map((c, i) => {
             const p = PLANS[c];
             return (
               <Reveal key={c} delay={i * 60}>
