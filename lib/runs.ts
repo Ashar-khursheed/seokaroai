@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { EventEmitter } from "node:events";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { db, parseJson, schema } from "@/lib/db";
 import { config } from "@/lib/config";
@@ -75,10 +75,14 @@ export async function createRun(o: {
 
 export async function cancelRun(id: string): Promise<boolean> {
   const l = live.get(id);
-  if (l) { l.abort.abort(); return true; }
+  if (l) {
+    l.abort.abort();
+    l.emitter.emit("end");
+    live.delete(id);
+  }
   const r = await db().update(schema.runs).set({ status: "cancelled", finishedAt: new Date(), error: "Cancelled" })
     .where(and(eq(schema.runs.id, id), inArray(schema.runs.status, ["queued", "running"])));
-  return (r[0] as { affectedRows?: number }).affectedRows === 1;
+  return Boolean(l) || (r[0] as { affectedRows?: number }).affectedRows === 1;
 }
 
 // ------------------------------------------------------------------ execution
@@ -142,7 +146,7 @@ export async function executeRun(run: Run, workerId: string) {
 
   await db().update(schema.runs).set({
     status, error, score, summary: JSON.stringify(summary), costUsd: cost, turns, finishedAt: new Date(), heartbeatAt: new Date(),
-  }).where(eq(schema.runs.id, run.id));
+  }).where(and(eq(schema.runs.id, run.id), ne(schema.runs.status, "cancelled")));
   emit(run.id, { kind: status === "done" ? "done" : "error", text: status === "done" ? `Finished${cost != null ? ` · $${cost.toFixed(2)}` : ""}` : `${status}: ${error ?? ""}` });
   await saveRunFilesToDb(run.id).catch((e) => console.error("[runs] saveRunFilesToDb", e));
   l.emitter.emit("end");
