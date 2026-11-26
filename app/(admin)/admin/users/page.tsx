@@ -3,7 +3,8 @@ import { db, schema } from "@/lib/db";
 import { effectivePlan, getPlan, PLANS } from "@/lib/plans";
 import { monthlyAiSpend } from "@/lib/usage";
 import { Card, timeAgo } from "@/components/ui";
-import { setUserPlan, toggleSuspend, verifyUserEmail } from "../actions";
+import { hasAddon } from "@/lib/addons";
+import { setUserPlan, toggleSuspend, toggleUserAddon, verifyUserEmail } from "../actions";
 
 export const metadata = { title: "Users" };
 
@@ -14,6 +15,7 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
     .where(term ? or(like(schema.users.email, `%${term}%`), like(schema.users.name, `%${term}%`)) : undefined)
     .orderBy(desc(schema.users.createdAt)).limit(200);
   const spend = new Map(await Promise.all(users.map(async (u) => [u.id, await monthlyAiSpend(u.id)] as const)));
+  const outreachMap = new Map(await Promise.all(users.map(async (u) => [u.id, await hasAddon(u, "community_outreach")] as const)));
   return (
     <div className="space-y-5">
       <h1 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em]">Users</h1>
@@ -39,6 +41,14 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
                       <select name="plan" defaultValue={u.plan} className="input !w-auto !py-1 text-xs">{Object.values(PLANS).map((p) => <option key={p.code} value={p.code}>{p.name}</option>)}</select>
                       <button className="btn !px-2 !py-1 text-xs">Set</button></form>
                     {!u.emailVerifiedAt && <form action={verifyUserEmail}><input type="hidden" name="userId" value={u.id} /><button className="btn !px-2 !py-1 text-xs">Confirm email</button></form>}
+                    {u.role !== "admin" && (
+                      <form action={toggleUserAddon}>
+                        <input type="hidden" name="userId" value={u.id} />
+                        <input type="hidden" name="addonCode" value="community_outreach" />
+                        <input type="hidden" name="enable" value={outreachMap.get(u.id) ? "0" : "1"} />
+                        <button className="btn !px-2 !py-1 text-xs">{outreachMap.get(u.id) ? "Revoke Outreach" : "+ Outreach Add-on"}</button>
+                      </form>
+                    )}
                     {u.role !== "admin" && <form action={toggleSuspend}><input type="hidden" name="userId" value={u.id} /><button className={`btn !px-2 !py-1 text-xs ${u.suspendedAt ? "" : "!text-rose-600"}`}>{u.suspendedAt ? "Reactivate" : "Suspend"}</button></form>}
                   </div>
                 </td>

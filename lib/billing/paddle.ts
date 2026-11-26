@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { config } from "@/lib/config";
 import { db, schema } from "@/lib/db";
 import { getPlan, PLANS, PAID_PLANS, type Cycle, type PlanCode } from "@/lib/plans";
+import { ADDON_LIST, ADDONS, setUserAddon, type AddonCode } from "@/lib/addons";
 import { paddleSettings, saveIntegrations } from "@/lib/integrations";
 import { sendMail } from "@/lib/email";
 import { planChangedEmail } from "@/lib/email/templates";
@@ -27,6 +28,19 @@ export async function billingConfigured(): Promise<boolean> {
 
 export async function priceIdFor(plan: PlanCode, cycle: Cycle): Promise<string> {
   return (await paddleSettings()).prices[`${plan}_${cycle}`] || "";
+}
+
+export async function addonPriceIdFor(code: AddonCode): Promise<string> {
+  return (await paddleSettings()).prices[ADDONS[code].priceKey] || "";
+}
+
+export async function addonForPrice(priceId: string): Promise<AddonCode | null> {
+  if (!priceId) return null;
+  const prices = (await paddleSettings()).prices;
+  for (const a of ADDON_LIST) {
+    if (prices[a.priceKey] && prices[a.priceKey] === priceId) return a.code;
+  }
+  return null;
 }
 
 export async function planForPrice(priceId: string): Promise<{ plan: PlanCode; cycle: Cycle } | null> {
@@ -99,9 +113,26 @@ async function applySubscription(sub: any, occurredAt: Date) {
   if (user.paddleSubscriptionId === sub.id && user.updatedAt > new Date(occurredAt.getTime() + 60_000) && sub.status === user.planStatus) return;
 
   const priceId = sub.items?.[0]?.price?.id ?? sub.items?.[0]?.price_id ?? "";
-  const mapped = await planForPrice(priceId);
   const status: string = sub.status ?? "active";
   const renews = sub.current_billing_period?.ends_at ?? sub.next_billed_at ?? sub.scheduled_change?.effective_at ?? null;
+
+  // Separate add-on subscription (does not touch the user's main plan).
+  const addon = await addonForPrice(priceId);
+  if (addon) {
+    await setUserAddon({
+      userId,
+      code: addon,
+      status,
+      paddleSubscriptionId: sub.id ?? null,
+      renewsAt: renews ? new Date(renews) : null,
+    });
+    if (sub.customer_id && !user.paddleCustomerId) {
+      await db().update(schema.users).set({ paddleCustomerId: sub.customer_id }).where(eq(schema.users.id, userId));
+    }
+    return;
+  }
+
+  const mapped = await planForPrice(priceId);
   const plan = status === "canceled" && !renews ? "free" : mapped?.plan ?? user.plan;
   await db().update(schema.users).set({
     plan, billingCycle: mapped?.cycle ?? user.billingCycle, planStatus: status, planRenewsAt: renews ? new Date(renews) : null,
@@ -237,6 +268,54 @@ export async function createPaddleCatalog(): Promise<string> {
       });
       prices[key] = d.data.id;
       made.push(`${plan.name} ${cycle} price`);
+    }
+  }
+  // Also create separate Add-on products & monthly prices
+  for (const addon of ADDON_LIST) {
+    const prodKey = `addon_${addon.code}`;
+    const prodId = (products[prodKey] || "").trim();
+    if (prodId && /^pro_[a-z0-9]+$/i.test(prodId)) {
+      try {
+        const res = await paddleApi(p.env, p.apiKey, `/products/${encodeURIComponent(prodId)}`);
+        if (res?.data?.status !== "active") delete products[prodKey];
+        else products[prodKey] = prodId;
+      } catch {
+        delete products[prodKey];
+      }
+    } else {
+      delete products[prodKey];
+    }
+    if (!products[prodKey]) {
+      const d = await paddleApi(p.env, p.apiKey, "/products", {
+        method: "POST",
+        body: JSON.stringify({ name: `SEOKaroAI Add-on · ${addon.name}`, tax_category: "standard", description: addon.tagline, custom_data: { addon: addon.code } }),
+      });
+      products[prodKey] = d.data.id;
+      made.push(`${addon.name} add-on product`);
+    }
+    const priceId = (prices[addon.priceKey] || "").trim();
+    let priceOk = false;
+    if (priceId && /^pri_[a-z0-9]+$/i.test(priceId)) {
+      try {
+        const res = await paddleApi(p.env, p.apiKey, `/prices/${encodeURIComponent(priceId)}`);
+        if (res?.data?.status === "active" && res?.data?.product_id === products[prodKey]) {
+          prices[addon.priceKey] = priceId;
+          priceOk = true;
+        }
+      } catch { /* recreate */ }
+    }
+    if (!priceOk) {
+      const d = await paddleApi(p.env, p.apiKey, "/prices", {
+        method: "POST",
+        body: JSON.stringify({
+          product_id: products[prodKey], name: `${addon.name} monthly`, description: `SEOKaroAI ${addon.name} Add-on, billed monthly`,
+          unit_price: { amount: String(addon.priceMonthly * 100), currency_code: "USD" },
+          billing_cycle: { interval: "month", frequency: 1 },
+          custom_data: { addon: addon.code },
+        }),
+      });
+      prices[addon.priceKey] = d.data.id;
+      made.push(`${addon.name} add-on price`);
     }
   }
   await saveIntegrations({ paddle: { products, prices } });

@@ -14,9 +14,9 @@ export default async function IntegrationsPage() {
   const i = await integrations();
   const src = async (sec: keyof Integrations, f: string) => sourceOf(sec, f);
   const p = i.paddle;
-  const priceKeys = ["starter_monthly", "starter_yearly", "pro_monthly", "pro_yearly", "agency_monthly", "agency_yearly"];
+  const priceKeys = ["starter_monthly", "starter_yearly", "pro_monthly", "pro_yearly", "agency_monthly", "agency_yearly", "addon_community_outreach_monthly"];
   const pricesSet = priceKeys.filter((k) => p.prices[k]).length;
-  const paddleReady = !!(p.apiKey && p.clientToken && p.webhookSecret && pricesSet === 6);
+  const paddleReady = !!(p.apiKey && p.clientToken && p.webhookSecret && pricesSet >= 6);
   const publicUrl = /^https:\/\//.test(config.appUrl) && !/localhost|127\.0\.0\.1/.test(config.appUrl);
 
   return (

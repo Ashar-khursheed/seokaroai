@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { config } from "@/lib/config";
 import { effectivePlan, PAID_PLANS, PLANS, type Cycle } from "@/lib/plans";
+import { ADDON_LIST, hasAddon } from "@/lib/addons";
 import { aiAllowance, fmtReset, monthlyUsage } from "@/lib/usage";
 import { paddleSettings } from "@/lib/integrations";
-import { billingConfigured, priceIdFor, signedCustomData } from "@/lib/billing/paddle";
+import { addonPriceIdFor, billingConfigured, priceIdFor, signedCustomData } from "@/lib/billing/paddle";
 import { CheckoutButton } from "@/components/client";
 import { Icon } from "@/components/icons";
 import { AllowanceMeter, Card, Meter, PageHeader } from "@/components/ui";
@@ -19,6 +21,13 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
   const cycle: Cycle = sp.cycle === "yearly" ? "yearly" : "monthly";
   const [ready, paddle] = await Promise.all([billingConfigured(), paddleSettings()]);
   const priceIds = Object.fromEntries(await Promise.all(PAID_PLANS.map(async (c) => [c, await priceIdFor(c, cycle)] as const)));
+  const addonState = await Promise.all(
+    ADDON_LIST.map(async (a) => ({
+      addon: a,
+      active: await hasAddon(user, a.code),
+      priceId: await addonPriceIdFor(a.code),
+    })),
+  );
   const hasSub = !!user.paddleSubscriptionId && ["active", "trialing", "past_due", "paused"].includes(user.planStatus);
   const customData = signedCustomData(user.id);
 
@@ -85,6 +94,56 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
           })}
         </div>
         <p className="muted mt-4 text-[12.5px]">Payments are processed by Paddle.com, our Merchant of Record, which handles invoices and sales tax. Cancel anytime; you keep your plan until the end of the paid period.</p>
+      </section>
+
+      <section id="addons" className="scroll-mt-6">
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold tracking-tight">Paid Add-ons (sold separately)</h2>
+          <p className="muted mt-1 text-sm">Optional power-ups billed separately from your main plan. Add or cancel anytime.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {addonState.map(({ addon, active, priceId }) => (
+            <div key={addon.code} className={`panel flex flex-col p-5 sm:p-6 ${active ? "border-low/50" : "border-brand-500/40"}`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Icon name="Sparkles" size={17} className="text-brand-500" />
+                  {addon.name}
+                </div>
+                {active ? (
+                  <span className="chip !py-0.5 text-low">Active</span>
+                ) : (
+                  <span className="chip !py-0.5 text-brand-500">Add-on</span>
+                )}
+              </div>
+              <div className="mt-3 text-3xl font-semibold tracking-tight">
+                ${addon.priceMonthly}<span className="muted text-sm font-normal">/month</span>
+              </div>
+              <p className="muted mt-2 text-[13.5px] leading-relaxed">{addon.tagline}</p>
+              <ul className="mt-4 flex-1 space-y-2 text-[13px]">
+                {addon.highlights.map((h) => (
+                  <li key={h} className="flex gap-2"><Icon name="Check" size={14} className="mt-0.5 shrink-0 text-low" />{h}</li>
+                ))}
+              </ul>
+              <div className="mt-5">
+                {active ? (
+                  <Link href="/app/outreach" className="btn btn-primary w-full">Open Reddit &amp; Quora Outreach <Icon name="ArrowRight" size={15} /></Link>
+                ) : ready && priceId ? (
+                  <CheckoutButton
+                    priceId={priceId}
+                    email={user.email}
+                    customData={customData}
+                    env={paddle.env}
+                    token={paddle.clientToken}
+                    label={`Add for $${addon.priceMonthly}/mo`}
+                    className="btn btn-brand w-full"
+                  />
+                ) : (
+                  <a className="btn w-full" href={`mailto:${config.supportEmail}?subject=${encodeURIComponent(`Add-on: ${addon.name}`)}`}>Contact us to activate</a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { PLANS, type PlanCode } from "@/lib/plans";
+import { ADDONS, setUserAddon, type AddonCode } from "@/lib/addons";
 import { slugify } from "@/lib/blog";
 import { runRankChecksNow, runScheduledAuditsNow } from "@/lib/worker";
 import type { FormState } from "@/components/client";
@@ -41,6 +42,22 @@ export async function verifyUserEmail(fd: FormData) {
   const id = Number(fd.get("userId"));
   await db().update(schema.users).set({ emailVerifiedAt: new Date() }).where(eq(schema.users.id, id));
   await log(admin.id, "verify_email", `user:${id}`);
+  revalidatePath("/admin/users");
+}
+
+export async function toggleUserAddon(fd: FormData) {
+  const admin = await requireAdmin();
+  const id = Number(fd.get("userId"));
+  const code = String(fd.get("addonCode")) as AddonCode;
+  const enable = fd.get("enable") === "1";
+  if (!(code in ADDONS)) return;
+  await setUserAddon({
+    userId: id,
+    code,
+    status: enable ? "active" : "inactive",
+    renewsAt: enable ? new Date(Date.now() + 31 * 864e5) : null,
+  });
+  await log(admin.id, enable ? "grant_addon" : "revoke_addon", `user:${id}`, code);
   revalidatePath("/admin/users");
 }
 

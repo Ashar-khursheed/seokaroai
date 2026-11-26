@@ -38,6 +38,7 @@ function fromEnv(): Integrations {
         starter_monthly: (e.PADDLE_PRICE_STARTER_MONTHLY || "").trim(), starter_yearly: (e.PADDLE_PRICE_STARTER_YEARLY || "").trim(),
         pro_monthly: (e.PADDLE_PRICE_PRO_MONTHLY || "").trim(), pro_yearly: (e.PADDLE_PRICE_PRO_YEARLY || "").trim(),
         agency_monthly: (e.PADDLE_PRICE_AGENCY_MONTHLY || "").trim(), agency_yearly: (e.PADDLE_PRICE_AGENCY_YEARLY || "").trim(),
+        addon_community_outreach_monthly: (e.PADDLE_PRICE_ADDON_OUTREACH_MONTHLY || "").trim(),
       },
       products: {},
     },

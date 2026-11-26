@@ -25,7 +25,7 @@ const fail = (e: unknown): FormState => ({ error: String((e as Error)?.message ?
 export async function savePaddle(_: FormState, fd: FormData): Promise<FormState> {
   const admin = await requireAdmin();
   const prices: Record<string, string> = {};
-  for (const k of ["starter_monthly", "starter_yearly", "pro_monthly", "pro_yearly", "agency_monthly", "agency_yearly"]) {
+  for (const k of ["starter_monthly", "starter_yearly", "pro_monthly", "pro_yearly", "agency_monthly", "agency_yearly", "addon_community_outreach_monthly"]) {
     const v = s(fd, `price_${k}`, 60);
     if (v && !/^pri_[a-z0-9]{10,}$/i.test(v)) return { error: `“${v}” is not a Paddle price ID (they start with pri_).` };
     prices[k] = v;

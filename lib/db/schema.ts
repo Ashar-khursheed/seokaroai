@@ -227,6 +227,35 @@ export const runFiles = mysqlTable(
   (t) => [primaryKey({ columns: [t.runId, t.path] })],
 );
 
+export const userAddons = mysqlTable("user_addons", {
+  id: id(),
+  userId: fk("user_id").notNull(),
+  addonCode: varchar("addon_code", { length: 40 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  paddleSubscriptionId: varchar("paddle_subscription_id", { length: 64 }),
+  renewsAt: dt("renews_at"),
+  createdAt: dt("created_at").notNull(),
+  updatedAt: dt("updated_at").notNull(),
+});
+
+export const outreachItems = mysqlTable("outreach_items", {
+  id: id(),
+  userId: fk("user_id").notNull(),
+  projectId: fk("project_id").notNull(),
+  platform: varchar("platform", { length: 16 }).notNull(),
+  title: varchar("title", { length: 300 }).notNull(),
+  url: varchar("url", { length: 700 }).notNull(),
+  community: varchar("community", { length: 140 }).notNull().default(""),
+  snippet: text("snippet"),
+  draftReply: mediumtext("draft_reply"),
+  status: varchar("status", { length: 16 }).notNull().default("found"),
+  postedUrl: varchar("posted_url", { length: 700 }),
+  createdAt: dt("created_at").notNull(),
+  updatedAt: dt("updated_at").notNull(),
+});
+
 export type Connector = typeof connectors.$inferSelect;
 export type FixChange = typeof fixChanges.$inferSelect;
 export type RunFile = typeof runFiles.$inferSelect;
+export type UserAddon = typeof userAddons.$inferSelect;
+export type OutreachItem = typeof outreachItems.$inferSelect;
