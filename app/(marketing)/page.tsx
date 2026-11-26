@@ -63,8 +63,31 @@ export default function Home() {
   return (
     <>
       <JsonLd data={[
-        { "@context": "https://schema.org", "@type": "Organization", "@id": `${config.appUrl}/#organization`, name: "SEOKaroAI", url: config.appUrl, logo: `${config.appUrl}/brand/logo-mark-512.png`, email: config.supportEmail },
-        { "@context": "https://schema.org", "@type": "WebSite", "@id": `${config.appUrl}/#website`, name: "SEOKaroAI", url: config.appUrl, publisher: { "@id": `${config.appUrl}/#organization` } },
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "@id": `${config.appUrl}/#organization`,
+          name: "SEOKaroAI",
+          alternateName: ["SEO Karo AI", "seokaroai", "seokaroai.com"],
+          url: config.appUrl,
+          description: "SEOKaroAI (seokaroai.com) is an AI SEO platform offering multi-agent website audits, daily Google rank tracking, Keyword Battle competitor analysis, and automated SEO fixes for WordPress, Shopify, and GitHub.",
+          logo: {
+            "@type": "ImageObject",
+            url: `${config.appUrl}/brand/app-icon-512.png`,
+            width: 512,
+            height: 512,
+          },
+          email: config.supportEmail,
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "@id": `${config.appUrl}/#website`,
+          name: "SEOKaroAI",
+          alternateName: ["SEO Karo AI", "seokaroai"],
+          url: config.appUrl,
+          publisher: { "@id": `${config.appUrl}/#organization` },
+        },
         appStructured,
         breadcrumb,
         faqStructured,
