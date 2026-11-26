@@ -285,11 +285,11 @@ export async function agentExec(runId: string, dir: string, prompt: string, clau
       if (abort.signal.aborted) return { cost: a.costUsd, turns: a.turns, error: "Cancelled" };
       emit(runId, { kind: "info", text: `Phase 2 · ${strategyModel} writes the competitor analysis, strategy and reports` });
       fs.writeFileSync(path.join(dir, "prompt-phase2.md"), phases.strategy);
-      const b = await step(strategyModel, phases.strategy, Math.max(0.3, cap - a.costUsd), 40);
+      const b = await step(strategyModel, phases.strategy, Math.max(0.3, cap - a.costUsd), 80);
       return { cost: a.costUsd + b.costUsd, turns: a.turns + b.turns, error: b.error };
     }
     emit(runId, { kind: "info", text: `OpenAI agent · ${ai.openaiModel}` });
-    const r = await step(ai.openaiModel, prompt, cap, 70);
+    const r = await step(ai.openaiModel, prompt, cap, 90);
     return { cost: r.costUsd, turns: r.turns, error: r.error };
   }
   const run = { id: runId };

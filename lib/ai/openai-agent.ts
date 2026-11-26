@@ -108,9 +108,12 @@ export async function runOpenAIAgent(o: {
       outputs.push({ type: "function_call_output", call_id: c.call_id, output: allowed ? await execTool(c.name, args, o.dir, o.onEvent) : "Skipped: budget wrap-up, only write_file is allowed now." });
     }
     if (wrapping && ++wrapTurns > 6) return { turns: turn, error: `Stopped while wrapping up at the spend cap ($${spent.toFixed(2)} used). Partial results are kept.`, usage, costUsd: spent };
-    if (!wrapping && spent >= o.budgetUsd * 0.8) {
+    if (!wrapping && (spent >= o.budgetUsd * 0.8 || turn >= maxTurns - 6)) {
       wrapping = true;
-      o.onEvent({ kind: "info", text: `Spend $${spent.toFixed(2)} of $${o.budgetUsd.toFixed(2)}: asking the agent to finish the report now` });
+      const reason = spent >= o.budgetUsd * 0.8
+        ? `Spend $${spent.toFixed(2)} of $${o.budgetUsd.toFixed(2)}`
+        : `Step ${turn} of ${maxTurns}`;
+      o.onEvent({ kind: "info", text: `${reason}: asking the agent to finish the report now` });
       outputs.push({ role: "user", content: o.wrapUp ?? WRAP_UP });
     }
     if (turn % 5 === 0) o.onEvent({ kind: "info", text: `Spend so far $${spent.toFixed(2)} of $${o.budgetUsd.toFixed(2)}` });
