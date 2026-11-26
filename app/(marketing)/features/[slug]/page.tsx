@@ -6,6 +6,8 @@ import { config } from "@/lib/config";
 import { CtaBand, FaqList, JsonLd, SectionHead } from "@/components/marketing";
 import { Reveal, Spotlight } from "@/components/motion";
 import { Icon } from "@/components/icons";
+import { TutorialPlayer } from "@/components/tutorial-player";
+import { TUTORIALS } from "@/lib/content/tutorials";
 
 import InstantChecker from "@/components/instant-checker";
 
@@ -23,6 +25,7 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
   const f = featureBySlug((await params).slug);
   if (!f) notFound();
   const others = FEATURES.filter((x) => x.slug !== f.slug);
+  const tutorial = TUTORIALS.find((t) => t.slug === f.slug);
 
   const faqStructured = {
     "@context": "https://schema.org",
@@ -38,11 +41,7 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
     description: f.metaDescription,
     applicationCategory: "BusinessApplication",
     operatingSystem: "All",
-    screenshot: [
-      `${config.appUrl}/brand/logo-mark-512.png`,
-      `${config.appUrl}/brand/logo-mark-256.png`,
-      `${config.appUrl}/brand/logo-mark-128.webp`,
-    ],
+    screenshot: [`${config.appUrl}/opengraph-image`],
   };
 
   const pageStructured = {
@@ -92,18 +91,17 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
 
-          {/* Quick screenshot gallery to improve static richness for crawlers */}
-          <div className="mt-6 grid grid-cols-3 gap-3 sm:mt-8">
-            <img src="/brand/logo-mark-512.png" alt={`Screenshot showing ${f.name} dashboard`} width={420} height={240} />
-            <img src="/brand/logo-mark-256.png" alt={`Annotated example report for ${f.name}`} width={420} height={240} />
-            <img src="/brand/logo-mark-128.webp" alt={`Comparison table example for ${f.name}`} width={420} height={240} />
-          </div>
-
           {/* Instant checker for the free checker page */}
           {f.slug === "website-seo-checker" && (
             <div className="mt-8">
-              {/* @ts-ignore - client component loaded dynamically */}
               <InstantChecker />
+            </div>
+          )}
+
+          {/* Interactive walkthrough video for this feature */}
+          {tutorial && (
+            <div className="mt-8 sm:mt-10">
+              <TutorialPlayer tutorial={tutorial} />
             </div>
           )}
         </div>
