@@ -151,6 +151,7 @@ Write audit-data.json EXACTLY in this shape (valid JSON, UTF-8):
  "action_plan":{"phases":[{"name":"Phase 1: Critical Fixes","timeframe":"Week 1","items":["..."]}]}}
 If a category could not be measured (e.g. PageSpeed quota, no backlink data), set its "score" to null, never 0,
 say why in its findings, and leave it out of the health_score weighting. 0 means "measured and failing".
+Use consistent category weights for health_score (Technical SEO 22%, Content Quality 23%, On-Page SEO 15%, Performance 12%, Schema 10%, AI Search Readiness 10%, Competitors 10%, Images 8%, normalized over measured categories only).
 Then write FULL-AUDIT-REPORT.md (executive summary, scores table, every category with evidence,
 competitor summary, limitations) and ACTION-PLAN.md (phased, dependency-ordered, each item with
 owner type, effort, "how we know it failed" and a leading indicator).

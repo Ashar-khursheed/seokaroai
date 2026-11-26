@@ -25,7 +25,14 @@ const AGENT_LABEL: Record<string, string> = {
 const ftitle = (f: Finding | string) => (typeof f === "string" ? f : f.title || f.issue || "Finding");
 const fsev = (f: Finding | string) => (typeof f === "string" ? undefined : f.severity);
 
-export function AuditView({ run, dir, view, file }: ViewProps) {
+export interface PrevAudit {
+  id: string;
+  score: number | null;
+  at: Date;
+  categories: { label: string; score: number | null }[];
+}
+
+export function AuditView({ run, dir, view, file, prev }: ViewProps & { prev?: PrevAudit | null }) {
   const id = run.id;
   const data = readJson<AuditData>(path.join(dir, "audit-data.json"));
   const files = listFiles(dir);
@@ -49,6 +56,14 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
   const doneFiles = files.map((f) => f.path);
   const boardAgents = AGENTS.map(({ id, name, icon, phase, role, file, when }) => ({ id, name, icon, phase, role, file, when }));
   const phases = Array.isArray(data?.action_plan) ? data!.action_plan : (data?.action_plan as { phases?: [] } | undefined)?.phases ?? [];
+  const currentScore = data?.summary?.health_score ?? run.score ?? null;
+  const overallDelta = currentScore != null && prev?.score != null ? currentScore - prev.score : null;
+  const prevCatScore = (name: string) => {
+    if (!prev?.categories?.length) return null;
+    const key = name.toLowerCase().split(/[/,(]/)[0].trim();
+    const hit = prev.categories.find((c) => c.label.toLowerCase().includes(key) || key.includes(c.label.toLowerCase().split(/[/,(]/)[0].trim()));
+    return typeof hit?.score === "number" ? hit.score : null;
+  };
 
   const side = (
     <>
@@ -89,9 +104,14 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
               <div className="text-xs font-bold uppercase tracking-wider text-brand-600">AI deep audit · SEO health score</div>
               <h1 className="truncate text-xl font-bold sm:text-2xl">{host}</h1>
               <div className="muted">{data?.summary?.business_type}</div>
-              <div className="muted mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+              <div className="muted mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 {run.finishedAt && <span>Finished {run.finishedAt.toLocaleString()}</span>}
                 <span>{findings.length} agent reports · {[...flowGroups.values()].flat().length} flow files · {shots.length} screenshots</span>
+                {overallDelta != null && prev && (
+                  <Link href={`/app/runs/${encodeURIComponent(prev.id)}`} className={`rounded-full px-2 py-0.5 font-semibold ${overallDelta > 0 ? "bg-low/15 text-low" : overallDelta < 0 ? "bg-crit/15 text-crit" : "bg-[var(--panel2)] muted"}`}>
+                    {overallDelta > 0 ? `+${overallDelta}` : overallDelta < 0 ? `${overallDelta}` : "±0"} vs previous ({prev.score})
+                  </Link>
+                )}
               </div>
             </div>
             <div className="flex w-full flex-wrap gap-2 sm:w-auto print:hidden">
@@ -120,14 +140,25 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
             </div>
           )}
           {data?.categories && (
-            <Card title="Category scores">
-              <div className="space-y-2">{data.categories.map((c, i) => (
-                <Link key={i} href={`${href(id, { view: "categories" })}#cat-${i}`} className="grid grid-cols-[minmax(100px,130px)_1fr_36px] items-center gap-3 text-sm hover:opacity-80 sm:grid-cols-[minmax(120px,220px)_1fr_44px]">
-                  <span className="truncate">{c.name}</span>
-                  <span className="panel2 h-3 overflow-hidden rounded-full"><span className="block h-full rounded-full" style={{ width: `${c.score ?? 0}%`, background: scoreColor(c.score) }} /></span>
-                  <b style={{ color: scoreColor(c.score) }}>{c.score ?? "–"}</b>
-                </Link>
-              ))}</div>
+            <Card title="Category scores" action={prev ? <span className="muted text-xs">Delta vs {prev.at.toLocaleDateString()}</span> : undefined}>
+              <div className="space-y-2">{data.categories.map((c, i) => {
+                const ps = prevCatScore(c.name);
+                const d = typeof c.score === "number" && ps != null ? Math.round(c.score) - Math.round(ps) : null;
+                return (
+                  <Link key={i} href={`${href(id, { view: "categories" })}#cat-${i}`} className="grid grid-cols-[minmax(100px,130px)_1fr_auto] items-center gap-3 text-sm hover:opacity-80 sm:grid-cols-[minmax(120px,220px)_1fr_auto]">
+                    <span className="truncate">{c.name}</span>
+                    <span className="panel2 h-3 overflow-hidden rounded-full"><span className="block h-full rounded-full" style={{ width: `${c.score ?? 0}%`, background: scoreColor(c.score) }} /></span>
+                    <span className="flex items-center justify-end gap-1.5 tabular-nums">
+                      <b className="w-7 text-right" style={{ color: scoreColor(c.score) }}>{c.score ?? "–"}</b>
+                      {d != null && (
+                        <span className={`w-9 text-right text-xs font-semibold ${d > 0 ? "text-low" : d < 0 ? "text-crit" : "muted"}`}>
+                          {d > 0 ? `+${d}` : d < 0 ? `${d}` : "±0"}
+                        </span>
+                      )}
+                    </span>
+                  </Link>
+                );
+              })}</div>
             </Card>
           )}
           {findings.length > 0 && (

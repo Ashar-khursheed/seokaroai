@@ -171,15 +171,44 @@ async function afterRun(run: Run, status: string, score: number | null, summary:
   await sendMail({ to: user.email, userId: user.id, kind: "run_done", ...mail });
 }
 
+function categoryWeight(name: string): number {
+  const n = name.toLowerCase();
+  if (n.includes("technical")) return 22;
+  if (n.includes("content") || n.includes("e-e-a-t")) return 23;
+  if (n.includes("on-page") || n.includes("on page")) return 15;
+  if (n.includes("performance") || n.includes("cwv") || n.includes("speed")) return 12;
+  if (n.includes("schema") || n.includes("structured")) return 10;
+  if (n.includes("ai") || n.includes("geo")) return 10;
+  if (n.includes("competitor")) return 10;
+  if (n.includes("image")) return 8;
+  return 8;
+}
+
 function summarizeDeep(dir: string) {
-  const d = readJson<any>(path.join(dir, "audit-data.json"));
+  const file = path.join(dir, "audit-data.json");
+  const d = readJson<any>(file);
   if (!d) return { score: null, summary: {} };
+  const cats = (d.categories ?? []) as { name?: string; score?: number | null }[];
+  // Compute deterministic weighted score across measured (non-null) categories so missing data never skews the score.
+  let wSum = 0;
+  let vSum = 0;
+  for (const c of cats) {
+    if (typeof c.score !== "number" || !Number.isFinite(c.score)) continue;
+    const w = categoryWeight(String(c.name ?? ""));
+    wSum += w;
+    vSum += Math.max(0, Math.min(100, c.score)) * w;
+  }
+  const computed = wSum > 0 ? Math.round(vSum / wSum) : typeof d.summary?.health_score === "number" ? Math.round(d.summary.health_score) : null;
+  if (computed != null && d.summary && d.summary.health_score !== computed) {
+    d.summary.health_score = computed;
+    try { fs.writeFileSync(file, JSON.stringify(d, null, 2)); } catch { /* ignore */ }
+  }
   const top = (d.summary?.top_findings ?? []).map((f: any) => (typeof f === "string" ? { severity: "", title: f } : { severity: f.severity ?? "", title: f.title ?? f.issue ?? "" }));
   return {
-    score: typeof d.summary?.health_score === "number" ? Math.round(d.summary.health_score) : null,
+    score: computed,
     summary: {
       business_type: d.summary?.business_type ?? "",
-      categories: (d.categories ?? []).map((c: any) => ({ label: c.name, score: c.score ?? null })),
+      categories: cats.map((c) => ({ label: c.name ?? "", score: typeof c.score === "number" ? Math.round(c.score) : null })),
       top_issues: top.slice(0, 6),
       competitors: (d.competitors ?? []).map((c: any) => c.domain ?? c.name).filter(Boolean).slice(0, 6),
     },
