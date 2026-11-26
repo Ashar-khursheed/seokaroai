@@ -39,18 +39,28 @@ export function parseJsonOutput(stdout: string): any {
 }
 
 /** Run one bundled claude-seo script through the launcher; never throws. */
-export function runScript(script: string, args: string[], timeoutSec = 120, cwd?: string): Promise<ScriptResult> {
+export async function runScript(script: string, args: string[], timeoutSec = 120, cwd?: string): Promise<ScriptResult> {
   if (!/^[a-z_]+\.py$/.test(script)) throw new Error("bad script name");
   const bash = bashPath();
   const cmd = bash ?? config.launcherPath;
   const argv = bash ? [config.launcherPath, "run", script, ...args] : ["run", script, ...args];
+  const extraEnv: Record<string, string> = {};
+  try {
+    const integ = await (await import("@/lib/integrations")).integrations();
+    if (integ.google.apiKey) extraEnv.GOOGLE_API_KEY = integ.google.apiKey;
+    if (integ.dataforseo.login && integ.dataforseo.password) {
+      extraEnv.DATAFORSEO_LOGIN = integ.dataforseo.login;
+      extraEnv.DATAFORSEO_PASSWORD = integ.dataforseo.password;
+      extraEnv.DATAFORSEO_USERNAME = integ.dataforseo.login;
+    }
+  } catch { /* ignore if DB unavailable */ }
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
     let timedOut = false;
     const child = spawn(cmd, argv, {
       cwd,
-      env: { ...process.env, PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1" },
+      env: { ...process.env, ...extraEnv, PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1" },
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
     });

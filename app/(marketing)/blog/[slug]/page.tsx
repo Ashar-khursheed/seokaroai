@@ -13,9 +13,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!p) return { title: "Post not found" };
   const title = p.metaTitle || p.title;
   const description = p.metaDescription || p.excerpt;
+  const ogImage = p.coverImage || `${config.appUrl}/opengraph-image`;
   return {
     title, description, alternates: { canonical: `/blog/${p.slug}` },
-    openGraph: { type: "article", title, description, publishedTime: p.publishedAt?.toISOString(), modifiedTime: p.updatedAt.toISOString(), images: p.coverImage ? [p.coverImage] : undefined },
+    openGraph: { type: "article", title, description, publishedTime: p.publishedAt?.toISOString(), modifiedTime: p.updatedAt.toISOString(), images: [ogImage] },
+    twitter: { card: "summary_large_image", title, description, images: [ogImage] },
   };
 }
 

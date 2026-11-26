@@ -340,7 +340,11 @@ export async function agentExec(runId: string, dir: string, prompt: string, clau
       options: {
         cwd: dir, model, maxBudgetUsd: Math.min(budget, MAX_RUN_USD), abortController: abort,
         settingSources: ["user"], permissionMode: "default", canUseTool: makeGuard(dir), disallowedTools: ["PowerShell"],
-        env: { ...process.env, ANTHROPIC_API_KEY: await (await import("@/lib/integrations")).anthropicKey() },
+        env: {
+          ...process.env,
+          ANTHROPIC_API_KEY: await (await import("@/lib/integrations")).anthropicKey(),
+          GOOGLE_API_KEY: (await (await import("@/lib/integrations")).googleApiKey()) || process.env.GOOGLE_API_KEY || "",
+        },
         systemPrompt: { type: "preset", preset: "claude_code", append: "You run unattended inside SEOKaroAI for a paying customer. There is no human to answer questions: decide sensibly, note assumptions in CONTEXT.md or REPORT.md, and keep working until the requested files exist." },
       },
     });

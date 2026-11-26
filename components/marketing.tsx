@@ -69,7 +69,7 @@ export function MarketingFooter() {
           <a className="muted mt-4 inline-flex items-center gap-2 break-all text-sm hover:text-[var(--ink)]" href={`mailto:${config.supportEmail}`}><Icon name="Mail" size={15} />{config.supportEmail}</a>
         </div>
         <FooterCol title="Product" links={[...FEATURES.map((f) => [f.name, `/features/${f.slug}`] as [string, string]), ["Pricing", "/pricing"]]} />
-        <FooterCol title="Resources" links={[["Video Tutorials", "/tutorials"], ["Blog", "/blog"], ["RSS", "/blog/rss.xml"], ["llms.txt", "/llms.txt"], ["Sitemap", "/sitemap.xml"]]} />
+        <FooterCol title="Resources" links={[["Video Tutorials", "/tutorials"], ["vs Semrush", "/compare/seokaroai-vs-semrush"], ["vs Ahrefs", "/compare/seokaroai-vs-ahrefs"], ["Semrush Alternatives", "/compare/semrush-alternatives"], ["WordPress Auto-Fix", "/integrations/wordpress"], ["Shopify Auto-Fix", "/integrations/shopify"], ["GitHub Auto-Fix", "/integrations/github"], ["Blog", "/blog"]]} />
         <FooterCol title="Company" links={[["About", "/about"], ["Contact", "/contact"], ["Privacy", "/legal/privacy"], ["Terms", "/legal/terms"], ["Refunds", "/legal/refund"]]} />
       </div>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t line px-4 py-6 text-xs sm:px-6">

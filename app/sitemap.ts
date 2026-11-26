@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { config } from "@/lib/config";
 import { FEATURES } from "@/lib/content/features";
+import { COMPARE_PAGES } from "@/lib/content/compare";
+import { INTEGRATION_PAGES } from "@/lib/content/integrations-pages";
 import { LEGAL } from "@/lib/content/legal";
 import { publishedPosts } from "@/lib/blog";
 
@@ -17,6 +19,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: u("/tutorials"), lastModified: now },
     { url: u("/features"), lastModified: now },
     ...FEATURES.map((f) => ({ url: u(`/features/${f.slug}`), lastModified: now })),
+    ...COMPARE_PAGES.map((c) => ({ url: u(`/compare/${c.slug}`), lastModified: now })),
+    ...INTEGRATION_PAGES.map((i) => ({ url: u(`/integrations/${i.slug}`), lastModified: now })),
     { url: u("/blog"), lastModified: newest ?? now },
     ...posts.map((p) => ({ url: u(`/blog/${p.slug}`), lastModified: p.updatedAt })),
     { url: u("/about"), lastModified: now },
