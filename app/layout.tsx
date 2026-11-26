@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   applicationName: "SEOKaroAI",
   openGraph: { type: "website", siteName: "SEOKaroAI", locale: "en_US" },
   twitter: { card: "summary_large_image" },
+  verification: { google: "vDGFYnI-Lwpizf0CvgZg52ce3-2hWb5nuPP_5PcNh3Q" },
   formatDetection: { telephone: false },
 };
 
