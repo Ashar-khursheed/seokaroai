@@ -28,7 +28,16 @@ export function QuickView({ run, dir }: ViewProps) {
           <h1 className="truncate text-xl font-semibold tracking-[-0.02em] sm:text-2xl">{input.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</h1>
           <div className="muted mt-1 text-sm">{r ? `${r.pages.length} pages checked · ${new Date(r.generated_at).toLocaleString()}` : run.status === "failed" ? run.error : "Running…"}</div>
         </div>
-        <div className="flex flex-wrap gap-2 print:hidden">{running ? <CancelRunButton id={run.id} /> : <PrintButton />}</div>
+        <div className="flex flex-wrap gap-2 print:hidden">
+          {running ? (
+            <CancelRunButton id={run.id} />
+          ) : (
+            <>
+              <a className="btn btn-primary" href={`/api/runs/${encodeURIComponent(run.id)}/export?print=1`} target="_blank" rel="noopener">Save PDF</a>
+              <a className="btn" href={`/api/runs/${encodeURIComponent(run.id)}/export?download=1`}>Download HTML</a>
+            </>
+          )}
+        </div>
       </section>
 
       {(running || !r) && <Card title={running ? "Running now" : "Activity"}><LiveLog id={run.id} running={running} compact={!running ? false : true} /></Card>}

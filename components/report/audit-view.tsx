@@ -95,9 +95,16 @@ export function AuditView({ run, dir, view, file }: ViewProps) {
               </div>
             </div>
             <div className="flex w-full flex-wrap gap-2 sm:w-auto print:hidden">
-              {pdf && <a className="btn btn-primary" href={fileUrl(id, pdf.path, true)}>Download PDF</a>}
-              {htmlReport && <a className="btn" href={fileUrl(id, htmlReport.path)} target="_blank" rel="noopener">HTML report</a>}
-              {running ? <CancelRunButton id={id} /> : <PrintButton />}
+              {running ? (
+                <CancelRunButton id={id} />
+              ) : (
+                <>
+                  <a className="btn btn-primary" href={`/api/runs/${encodeURIComponent(id)}/export?print=1`} target="_blank" rel="noopener">Save PDF</a>
+                  <a className="btn" href={`/api/runs/${encodeURIComponent(id)}/export?download=1`}>Download HTML</a>
+                  {pdf && <a className="btn" href={fileUrl(id, pdf.path, true)}>Raw PDF</a>}
+                  {htmlReport && <a className="btn" href={fileUrl(id, htmlReport.path)} target="_blank" rel="noopener">Raw HTML</a>}
+                </>
+              )}
             </div>
           </section>
           {running && <><AgentBoard runId={id} running agents={boardAgents} doneFiles={doneFiles} /><p className="muted text-[12.5px]">The report fills in as agents finish. You can close this page; we email you when it is ready. Raw activity is under Live activity.</p></>}

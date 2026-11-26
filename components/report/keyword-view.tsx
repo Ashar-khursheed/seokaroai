@@ -74,7 +74,16 @@ export function KeywordView({ run, dir, view, file }: ViewProps) {
               <div className="muted truncate text-sm">{input.targetUrl} · {input.country}</div>
               <div className="mt-2 text-sm">Your position: <b>{cmp?.our_position ? `#${cmp.our_position}` : "not in the results checked"}</b></div>
             </div>
-            <div className="print:hidden">{running ? <CancelRunButton id={id} /> : <PrintButton />}</div>
+            <div className="flex flex-wrap gap-2 print:hidden">
+              {running ? (
+                <CancelRunButton id={id} />
+              ) : (
+                <>
+                  <a className="btn btn-primary" href={`/api/runs/${encodeURIComponent(id)}/export?print=1`} target="_blank" rel="noopener">Save PDF</a>
+                  <a className="btn" href={`/api/runs/${encodeURIComponent(id)}/export?download=1`}>Download HTML</a>
+                </>
+              )}
+            </div>
           </section>
           {running && <Card title="Running now"><LiveLog id={id} running compact /></Card>}
 

@@ -188,8 +188,22 @@ body { font-feature-settings: "ss01", "cv11"; }
 .md strong { font-weight: 650; }
 
 @media print {
+  :root {
+    --bg: #ffffff !important;
+    --bg-elev: #ffffff !important;
+    --panel: #ffffff !important;
+    --panel2: #f8fafc !important;
+    --line: #e2e8f0 !important;
+    --line-strong: #cbd5e1 !important;
+    --ink: #0f172a !important;
+    --muted: #475569 !important;
+    color-scheme: light !important;
+  }
   aside, header, .print\:hidden { display: none !important; }
-  body { background: #fff; color: #000; }
+  html, body { background: #fff !important; color: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .panel { break-inside: avoid; box-shadow: none !important; }
+  .table-wrap { overflow: visible !important; }
+  .table-wrap th, .table-wrap td { white-space: normal !important; }
 }
 
 /* ------------------------------------------------------------------ live agent board */
