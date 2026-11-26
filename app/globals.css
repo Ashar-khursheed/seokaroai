@@ -230,6 +230,10 @@ body { font-feature-settings: "ss01", "cv11"; }
 html, body { overflow-x: clip; max-width: 100%; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { -webkit-tap-highlight-color: transparent; }
+a[href], button:not(:disabled), [role="button"]:not([aria-disabled="true"]), summary, select:not(:disabled), input[type="checkbox"]:not(:disabled), input[type="radio"]:not(:disabled), .btn:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
 img, video, svg, canvas { max-width: 100%; }
 img, video { height: auto; }
 pre { max-width: 100%; }
