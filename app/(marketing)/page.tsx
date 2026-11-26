@@ -150,7 +150,7 @@ export default function Home() {
       <section className="mx-auto mt-20 sm:mt-32 max-w-6xl px-4 sm:px-6">
         <Reveal><SectionHead eyebrow="Platform" title="Everything an SEO team does, run by agents you can supervise." text="From the first crawl to the merged pull request, every step is measured, explained and reversible." /></Reveal>
         <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-2 md:grid-cols-6">
-          <Reveal><Spotlight className="panel card-hover h-full p-5 sm:p-8">
+          <Reveal className="sm:col-span-2 md:col-span-6"><Spotlight className="panel card-hover h-full p-5 sm:p-8">
               <Icon name={main.icon} size={22} className="text-brand-500" />
               <h3 className="mt-5 text-xl sm:text-2xl font-semibold tracking-tight">{main.h1}</h3>
               <p className="muted mt-3 max-w-xl leading-relaxed">{main.intro}</p>
