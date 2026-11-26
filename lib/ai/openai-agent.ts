@@ -75,14 +75,21 @@ export async function runOpenAIAgent(o: {
   const cost = () => costOf(usage, o.price);
   for (let turn = 1; turn <= maxTurns; turn++) {
     if (o.signal.aborted) return { turns: turn, error: "Cancelled", usage, costUsd: cost() };
-    const res = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST", signal: o.signal,
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: o.model, instructions: SYSTEM_SUFFIX, input, tools: wrapping ? TOOLS.filter((t) => (t as { name?: string }).name === "write_file") : TOOLS,
-        previous_response_id: previous, max_output_tokens: 12000, truncation: "auto",
-      }),
-    });
+    const turnSignal = AbortSignal.any([o.signal, AbortSignal.timeout(180_000)]);
+    let res: Response;
+    try {
+      res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST", signal: turnSignal,
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: o.model, instructions: SYSTEM_SUFFIX, input, tools: wrapping ? TOOLS.filter((t) => (t as { name?: string }).name === "write_file") : TOOLS,
+          previous_response_id: previous, max_output_tokens: 12000, truncation: "auto",
+        }),
+      });
+    } catch (e) {
+      if (o.signal.aborted) return { turns: turn, error: "Cancelled", usage, costUsd: cost() };
+      return { turns: turn, error: `OpenAI request timed out or failed: ${String((e as Error)?.message ?? e).slice(0, 200)}`, usage, costUsd: cost() };
+    }
     const data = await res.json();
     if (!res.ok) return { turns: turn, error: `OpenAI: ${data?.error?.message ?? res.status}`, usage, costUsd: cost() };
     previous = data.id;

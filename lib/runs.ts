@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { EventEmitter } from "node:events";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { db, parseJson, schema } from "@/lib/db";
 import { config } from "@/lib/config";
@@ -77,7 +77,7 @@ export async function cancelRun(id: string): Promise<boolean> {
   const l = live.get(id);
   if (l) { l.abort.abort(); return true; }
   const r = await db().update(schema.runs).set({ status: "cancelled", finishedAt: new Date(), error: "Cancelled" })
-    .where(and(eq(schema.runs.id, id), eq(schema.runs.status, "queued")));
+    .where(and(eq(schema.runs.id, id), inArray(schema.runs.status, ["queued", "running"])));
   return (r[0] as { affectedRows?: number }).affectedRows === 1;
 }
 

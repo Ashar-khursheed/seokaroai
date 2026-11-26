@@ -83,6 +83,7 @@ async function automations() {
   if (st.busyAuto) return;
   st.busyAuto = true;
   try {
+    await recoverStale();
     await scheduledAudits();
     await rankChecks();
     await weeklyDigest();
