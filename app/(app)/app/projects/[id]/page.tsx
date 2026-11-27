@@ -3,12 +3,14 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { parseJson } from "@/lib/db";
 import { effectivePlan } from "@/lib/plans";
-import { COUNTRIES, LANGUAGES } from "@/lib/config";
+import { COUNTRIES, LANGUAGES, config } from "@/lib/config";
 import { AUDIT_FLOW_KEYS } from "@/lib/prompts";
 import { rankTrackingAvailable } from "@/lib/engine/ranks";
 import { projectConnectors } from "@/lib/connectors";
 import { CONNECTOR_INFO } from "@/lib/connectors/types";
 import { localFoldersAllowed } from "@/lib/connectors/folder";
+import { analyzeInternalLinks } from "@/lib/internal-links";
+import { gatekeeperSecret, monthlyGatekeeperCount, recentGatekeeperLogs } from "@/lib/pr-gatekeeper";
 import { latestTop10, ownedProject, projectKeywords, rankBuckets, rankHistory, recentRuns, scoreHistory } from "@/lib/queries";
 import { ActionForm, AutoRefresh, ConfirmButton, SubmitButton } from "@/components/client";
 import { Icon } from "@/components/icons";
@@ -39,6 +41,18 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
   const plan = effectivePlan(user);
   const [kws, runs, history, conns] = await Promise.all([projectKeywords(p.id), recentRuns({ projectId: p.id, limit: 40 }), scoreHistory(p.id), projectConnectors(p.id)]);
   const latestAudit = runs.find((r) => r.status === "done" && (r.kind === "quick" || r.kind === "deep"));
+  const latestQuick = runs.find((r) => r.status === "done" && r.kind === "quick");
+  const [internalLinks, prLogs, prUsed] =
+    tab === "fix"
+      ? await Promise.all([
+          analyzeInternalLinks(latestQuick?.id ?? null, kws.map((k) => k.keyword)),
+          recentGatekeeperLogs(p.id, 10),
+          monthlyGatekeeperCount(p.id),
+        ])
+      : [{ pagesAnalyzed: 0, suggestions: [], instructions: "" }, [], 0];
+  const prLimit = user.role === "admin" ? 10000 : plan.limits.prChecks;
+  const ghWebhookUrl = `${config.appUrl}/api/webhooks/github?project=${p.id}`;
+  const ghWebhookSecret = gatekeeperSecret(p.id);
   const latestSummary = parseJson<{ categories?: { label: string; score: number | null }[]; top_issues?: { severity: string; title: string }[] }>(latestAudit?.summary, {});
   const running = runs.some((r) => r.status === "running" || r.status === "queued");
   const buckets = rankBuckets(kws);
@@ -160,6 +174,101 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
               </ActionForm>
             </Card>
           )}
+
+          {/* Auto Internal Linking */}
+          <Card title="Auto Internal Linking (zero-cost opportunity scan)">
+            {internalLinks.suggestions.length === 0 ? (
+              <p className="muted text-[13.5px]">Run a site audit first so SEOKaroAI can map your pages and suggest high-impact internal links.</p>
+            ) : (
+              <div className="space-y-4">
+                <p className="muted text-[13.5px]">Found <b>{internalLinks.suggestions.length}</b> contextual internal link opportunities across {internalLinks.pagesAnalyzed} crawled pages. Review below or ship them in one click via AI Auto-Fix.</p>
+                <div className="table-wrap">
+                  <table className="w-full min-w-[600px] text-[13px]">
+                    <thead><tr className="muted border-b line text-left text-xs"><th className="py-2 pr-3">From page</th><th className="pr-3">Link to</th><th className="pr-3">Suggested anchor</th><th>Why</th></tr></thead>
+                    <tbody>
+                      {internalLinks.suggestions.map((s) => (
+                        <tr key={`${s.fromUrl}-${s.toUrl}`} className="border-b line last:border-0">
+                          <td className="py-2 pr-3 font-mono text-xs">{s.fromUrl}</td>
+                          <td className="pr-3 font-mono text-xs text-brand-500">{s.toUrl}</td>
+                          <td className="wrap pr-3 font-medium">“{s.anchor}”</td>
+                          <td className="wrap muted text-xs">{s.reason}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {conns.some((c) => c.status === "ok" && c.kind !== "local") && (
+                  <ActionForm action={startFix} className="flex flex-col gap-3 border-t line pt-4 sm:flex-row sm:items-center">
+                    <input type="hidden" name="projectId" value={p.id} />
+                    <input type="hidden" name="sourceRunId" value={latestQuick?.id ?? ""} />
+                    <input type="hidden" name="instructions" value={internalLinks.instructions} />
+                    <select name="connectorId" className="input sm:!w-auto">
+                      {conns.filter((c) => c.status === "ok" && c.kind !== "local").map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                    <SubmitButton className="btn btn-brand w-full sm:w-auto" pendingText="Starting…">
+                      <Icon name="WandSparkles" size={15} />Ship internal links via Auto-Fix
+                    </SubmitButton>
+                    <span className="muted text-xs">Uses 1 metered Auto-Fix run · review diff before applying.</span>
+                  </ActionForm>
+                )}
+              </div>
+            )}
+          </Card>
+
+          {/* GitHub PR SEO Gatekeeper */}
+          <Card title="GitHub PR SEO Gatekeeper · automated PR checks">
+            {prLimit <= 0 ? (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="font-medium">Block SEO regressions before code merges to main</div>
+                  <p className="muted mt-1 text-[13.5px]">Automatically checks every GitHub Pull Request for accidental <code className="font-mono">noindex</code>, <code className="font-mono">robots.txt</code> blocks, missing <code className="font-mono">alt</code> tags, overlong titles/metas, and duplicate H1s. Included in Starter ($39/mo) &amp; above.</p>
+                </div>
+                <Link href="/app/billing" className="btn btn-brand shrink-0">Upgrade to Starter</Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+                  <span className="muted">Automatically comments SEO Pass/Fail checks on every opened or updated Pull Request.</span>
+                  <span className="chip !py-0.5 font-mono text-xs">{prUsed} / {user.role === "admin" ? "∞" : prLimit} checks this month</span>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="panel2 min-w-0 rounded-xl border line p-3">
+                    <div className="muted text-[11px] font-semibold uppercase tracking-wider">1. Payload URL (GitHub → Settings → Webhooks)</div>
+                    <div className="mt-1 select-all break-all font-mono text-xs">{ghWebhookUrl}</div>
+                  </div>
+                  <div className="panel2 min-w-0 rounded-xl border line p-3">
+                    <div className="muted text-[11px] font-semibold uppercase tracking-wider">2. Webhook Secret (Content type: application/json)</div>
+                    <div className="mt-1 select-all break-all font-mono text-xs">{ghWebhookSecret}</div>
+                  </div>
+                </div>
+                <p className="muted text-xs">3. Under <b>Which events would you like to trigger this webhook?</b> select <b>Pull requests</b> (make sure your GitHub connector above is connected so SEOKaroAI can post PR review comments).</p>
+                {prLogs.length > 0 && (
+                  <div className="table-wrap border-t line pt-3">
+                    <table className="w-full min-w-[560px] text-[13px]">
+                      <thead><tr className="muted border-b line text-left text-xs"><th className="py-2 pr-3">Pull Request</th><th className="pr-3">Result</th><th className="pr-3">Issues</th><th>Checked</th></tr></thead>
+                      <tbody>
+                        {prLogs.map((log) => (
+                          <tr key={log.id} className="border-b line last:border-0">
+                            <td className="wrap py-2 pr-3">
+                              <a href={log.pr_url} target="_blank" rel="noopener noreferrer" className="font-medium hover:text-brand-500">#{log.pr_number} · {log.pr_title}</a>
+                              <div className="muted text-[11.5px]">{log.summary}</div>
+                            </td>
+                            <td className="pr-3">
+                              <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${log.status === "passed" ? "bg-low/15 text-low" : log.status === "failed" ? "bg-crit/15 text-crit" : "bg-high/15 text-high"}`}>
+                                {log.status}
+                              </span>
+                            </td>
+                            <td className="pr-3 tabular-nums">{log.issues_count}</td>
+                            <td className="muted text-xs">{timeAgo(new Date(log.created_at))}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </Card>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <ConnectorForm projectId={p.id} kind="wordpress" fields={[
