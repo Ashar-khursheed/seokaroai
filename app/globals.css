@@ -225,6 +225,13 @@ body { font-feature-settings: "ss01", "cv11"; }
 .progress-glow { box-shadow: 0 0 14px #1f86ff; }
 @keyframes spin-border { to { --spin: 360deg; } }
 @keyframes card-breathe { 50% { opacity: .45; } }
+@keyframes wave-hand {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  10%, 30% { transform: rotate(18deg); }
+  20%, 40% { transform: rotate(-12deg); }
+  50% { transform: rotate(10deg); }
+}
+.wave-hand { transform-origin: 70% 70%; animation: wave-hand 2.4s ease-in-out infinite; }
 
 /* ------------------------------------------------------------------ responsive foundation */
 html, body { overflow-x: clip; max-width: 100%; }

@@ -1,4 +1,5 @@
 import { MarketingFooter, MarketingHeader } from "@/components/marketing";
+import { SeoKaroChatbot } from "@/components/chatbot";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <MarketingHeader />
       <main id="main">{children}</main>
       <MarketingFooter />
+      <SeoKaroChatbot />
     </>
   );
 }
