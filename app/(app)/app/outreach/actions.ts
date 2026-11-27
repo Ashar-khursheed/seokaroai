@@ -27,13 +27,16 @@ export async function findOutreachOpportunities(_: FormState, fd: FormData): Pro
   try {
     const r = await discoverOutreach(project, user.id, topic, platform);
     revalidatePath("/app/outreach");
+    if (r.needsKeyword) {
+      return { error: "Enter a niche or problem keyword (e.g. “ai chatbot”, “seo audit tool”, “shopify seo”) to find real Reddit & Quora posts." };
+    }
     if (r.added > 0) {
-      return { ok: true, message: `Found ${r.added} new discussion${r.added === 1 ? "" : "s"} for “${r.query}” (${project.name}).` };
+      return { ok: true, message: `Found ${r.added} real discussion${r.added === 1 ? "" : "s"} for “${r.query}” (${project.name}).` };
     }
     if (r.alreadySaved > 0) {
-      return { ok: true, message: `All ${r.alreadySaved} matching thread${r.alreadySaved === 1 ? "" : "s"} for “${r.query}” are already in ${project.name}’s list below.` };
+      return { ok: true, message: `All ${r.alreadySaved} matching post${r.alreadySaved === 1 ? "" : "s"} for “${r.query}” are already in ${project.name}’s list below.` };
     }
-    return { ok: true, message: `No threads found for “${r.query}” right now. Try a broader keyword.` };
+    return { error: `No real Reddit/Quora posts found for “${r.query}”. Try a niche/problem keyword people actually ask about (e.g. “ai chatbot”, “customer support bot”, “seo audit”).` };
   } catch (e) {
     return { error: String((e as Error)?.message ?? e).slice(0, 300) };
   }

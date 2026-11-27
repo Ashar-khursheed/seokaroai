@@ -1,9 +1,9 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, like, or } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import type { OutreachItem, Project } from "@/lib/db/schema";
 import { ensureAddonTables } from "@/lib/addons";
 import { complete } from "@/lib/ai/complete";
-import { liveTop10 } from "@/lib/engine/ranks";
+import { serpSearch } from "@/lib/engine/ranks";
 
 interface DiscoveredThread {
   platform: "reddit" | "quora";
@@ -12,6 +12,9 @@ interface DiscoveredThread {
   community: string;
   snippet: string;
 }
+
+const REAL_REDDIT_POST_RE = /reddit\.com\/r\/([^/?#]+)\/comments\/([a-z0-9]+)/i;
+const BAD_QUORA_PATH_RE = /quora\.com\/(search|topic|profile|spaces|about|careers|terms|privacy)\b/i;
 
 function extractSubreddit(url: string): string {
   const m = url.match(/reddit\.com\/r\/([^/?#]+)/i);
@@ -30,24 +33,70 @@ function decodeXml(s: string): string {
     .trim();
 }
 
+/** 1. Real Reddit posts via DataForSEO Google SERP (never IP-blocked on Hostinger). */
 async function searchRedditViaSerp(query: string, country: string, language: string): Promise<DiscoveredThread[]> {
-  try {
-    const serp = await liveTop10(`site:reddit.com/r/ ${query}`, country, language);
-    const hits = (serp?.results ?? []).filter((r) => /reddit\.com\/r\//i.test(r.url));
-    if (hits.length) {
-      return hits.slice(0, 8).map((r) => ({
-        platform: "reddit" as const,
-        title: String(r.title || r.url).replace(/\s*:\s*r\/[a-z0-9_]+\s*$/i, "").replace(/\s*-\s*Reddit$/i, "").slice(0, 290),
-        url: r.url.slice(0, 690),
-        community: extractSubreddit(r.url),
-        snippet: `Google #${r.position} Reddit discussion for “${query}”.`,
-      }));
+  const items = await serpSearch(`site:reddit.com/r/ "${query}"`, country, language, 20);
+  let hits = items.filter((r) => REAL_REDDIT_POST_RE.test(r.url));
+  if (hits.length < 3) {
+    const broader = await serpSearch(`site:reddit.com/r/ ${query}`, country, language, 20);
+    const seen = new Set(hits.map((h) => h.url));
+    for (const r of broader) {
+      if (REAL_REDDIT_POST_RE.test(r.url) && !seen.has(r.url)) {
+        seen.add(r.url);
+        hits.push(r);
+      }
     }
-  } catch { /* try next source */ }
-  return [];
+  }
+  return hits.slice(0, 8).map((r) => ({
+    platform: "reddit" as const,
+    title: String(r.title || r.url)
+      .replace(/\s*:\s*r\/[a-z0-9_]+\s*$/i, "")
+      .replace(/\s*-\s*Reddit$/i, "")
+      .trim()
+      .slice(0, 290),
+    url: r.url.slice(0, 690),
+    community: extractSubreddit(r.url),
+    snippet: (r.description || `Google #${r.position} Reddit thread for “${query}”.`).slice(0, 500),
+  }));
 }
 
-async function searchRedditViaRss(query: string): Promise<DiscoveredThread[]> {
+/** 2. Real Reddit posts via PullPush public Reddit submission index (works from datacenter IPs). */
+async function searchRedditViaPullPush(query: string): Promise<DiscoveredThread[]> {
+  try {
+    const res = await fetch(
+      `https://api.pullpush.io/reddit/search/submission/?q=${encodeURIComponent(query)}&size=10&sort=desc&sort_type=created_utc`,
+      {
+        headers: { "User-Agent": "SEOKaroAI/2.0 (+https://seokaroai.com)" },
+        signal: AbortSignal.timeout(10_000),
+      },
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    const rows = (data?.data ?? []) as any[];
+    return rows
+      .filter((d) => d && d.title && d.permalink && !d.over_18 && !d.removed_by_category)
+      .slice(0, 8)
+      .map((d) => {
+        const body = String(d.selftext ?? "").replace(/\s+/g, " ").trim();
+        const stats = [
+          typeof d.score === "number" ? `${d.score} upvotes` : "",
+          typeof d.num_comments === "number" ? `${d.num_comments} comments` : "",
+        ].filter(Boolean).join(" · ");
+        return {
+          platform: "reddit" as const,
+          title: String(d.title).slice(0, 290),
+          url: `https://www.reddit.com${String(d.permalink)}`.slice(0, 690),
+          community: d.subreddit ? `r/${d.subreddit}` : "Reddit",
+          snippet: [stats ? `[${stats}]` : "", body.slice(0, 420)].filter(Boolean).join(" "),
+        };
+      });
+  } catch {
+    return [];
+  }
+}
+
+/** 3. Real Reddit posts via Atom/RSS + JSON fallback. */
+async function searchRedditDirect(query: string): Promise<DiscoveredThread[]> {
   try {
     const res = await fetch(
       `https://www.reddit.com/search.rss?q=${encodeURIComponent(query)}&sort=relevance&t=month&limit=10`,
@@ -56,162 +105,66 @@ async function searchRedditViaRss(query: string): Promise<DiscoveredThread[]> {
           "User-Agent": "Mozilla/5.0 (compatible; SEOKaroAI/2.0; +https://seokaroai.com)",
           Accept: "application/atom+xml, application/xml, text/xml",
         },
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(8_000),
       },
     );
-    if (!res.ok) return [];
-    const xml = await res.text();
-    const entries = xml.match(/<entry>[\s\S]*?<\/entry>/gi) ?? [];
-    const out: DiscoveredThread[] = [];
-    for (const entry of entries.slice(0, 8)) {
-      const titleM = entry.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-      const linkM = entry.match(/<link[^>]+href="([^"]+)"/i);
-      const contentM = entry.match(/<content[^>]*>([\s\S]*?)<\/content>/i);
-      if (!titleM || !linkM) continue;
-      const url = decodeXml(linkM[1]).slice(0, 690);
-      const title = decodeXml(titleM[1]).slice(0, 290);
-      const snippet = contentM ? decodeXml(contentM[1]).slice(0, 420) : "";
-      if (title && url) {
+    if (res.ok) {
+      const xml = await res.text();
+      const entries = xml.match(/<entry>[\s\S]*?<\/entry>/gi) ?? [];
+      const out: DiscoveredThread[] = [];
+      for (const entry of entries.slice(0, 8)) {
+        const titleM = entry.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+        const linkM = entry.match(/<link[^>]+href="([^"]+)"/i);
+        const contentM = entry.match(/<content[^>]*>([\s\S]*?)<\/content>/i);
+        if (!titleM || !linkM) continue;
+        const url = decodeXml(linkM[1]).slice(0, 690);
+        if (!REAL_REDDIT_POST_RE.test(url)) continue;
         out.push({
           platform: "reddit",
-          title,
+          title: decodeXml(titleM[1]).slice(0, 290),
           url,
           community: extractSubreddit(url),
-          snippet,
+          snippet: contentM ? decodeXml(contentM[1]).slice(0, 420) : "",
         });
       }
+      if (out.length) return out;
     }
-    return out;
-  } catch {
-    return [];
-  }
-}
-
-async function searchRedditViaJson(query: string): Promise<DiscoveredThread[]> {
-  for (const host of ["old.reddit.com", "www.reddit.com"]) {
-    try {
-      const res = await fetch(
-        `https://${host}/search.json?q=${encodeURIComponent(query)}&sort=relevance&t=month&limit=10`,
-        {
-          headers: { "User-Agent": "Mozilla/5.0 (compatible; SEOKaroAI/2.0; +https://seokaroai.com)" },
-          signal: AbortSignal.timeout(10_000),
-        },
-      );
-      if (!res.ok) continue;
-      const data = await res.json();
-      const children = (data?.data?.children ?? []) as any[];
-      const items = children
-        .map((c) => c?.data)
-        .filter((d) => d && d.title && d.permalink && !d.over_18)
-        .slice(0, 8)
-        .map((d) => ({
-          platform: "reddit" as const,
-          title: String(d.title).slice(0, 290),
-          url: `https://www.reddit.com${String(d.permalink)}`.slice(0, 690),
-          community: d.subreddit ? `r/${d.subreddit}` : "Reddit",
-          snippet: String(d.selftext ?? "").replace(/\s+/g, " ").trim().slice(0, 500),
-        }));
-      if (items.length) return items;
-    } catch { /* try next host */ }
-  }
+  } catch { /* ignore */ }
   return [];
 }
 
 async function searchReddit(query: string, country: string, language: string): Promise<DiscoveredThread[]> {
-  // 1. DataForSEO Google SERP first — never blocked by Reddit datacenter IP limits
-  const serp = await searchRedditViaSerp(query, country, language);
-  if (serp.length >= 3) return serp;
-
-  // 2. Reddit Atom/RSS feed
-  const rss = await searchRedditViaRss(query);
-  if (rss.length) return [...serp, ...rss].slice(0, 8);
-
-  // 3. Reddit JSON API
-  const json = await searchRedditViaJson(query);
-  if (json.length) return [...serp, ...json].slice(0, 8);
-
-  if (serp.length) return serp;
-
-  // 4. Broad SERP fallback without site:/r/ operator
-  try {
-    const broad = await liveTop10(`reddit ${query}`, country, language);
-    const hits = (broad?.results ?? []).filter((r) => /reddit\.com/i.test(r.url));
-    if (hits.length) {
-      return hits.slice(0, 6).map((r) => ({
-        platform: "reddit" as const,
-        title: String(r.title || r.url).replace(/\s*-\s*Reddit$/i, "").slice(0, 290),
-        url: r.url.slice(0, 690),
-        community: extractSubreddit(r.url),
-        snippet: `Google #${r.position} Reddit thread for “${query}”.`,
-      }));
-    }
-  } catch { /* fall back to direct search links */ }
-
-  // 5. Guaranteed curated Reddit entry points when all live APIs are unavailable
-  const clean = query.trim();
-  if (!clean) return [];
-  return [
-    {
-      platform: "reddit",
-      title: `Recent Reddit discussions about “${clean}” (past month)`,
-      url: `https://www.reddit.com/search/?q=${encodeURIComponent(clean)}&sort=relevance&t=month`,
-      community: "Reddit Search",
-      snippet: "Open active Reddit threads from the past 30 days for this topic, pick a question, and paste your AI draft below.",
-    },
-    {
-      platform: "reddit",
-      title: `Newest Reddit posts asking about “${clean}”`,
-      url: `https://www.reddit.com/search/?q=${encodeURIComponent(clean)}&sort=new`,
-      community: "Reddit New",
-      snippet: "Catch brand-new questions early before they get crowded. Generate a value-first AI draft below.",
-    },
-  ];
+  const [serp, pullpush] = await Promise.all([
+    searchRedditViaSerp(query, country, language),
+    searchRedditViaPullPush(query),
+  ]);
+  const combined: DiscoveredThread[] = [];
+  const seen = new Set<string>();
+  for (const item of [...serp, ...pullpush]) {
+    if (!REAL_REDDIT_POST_RE.test(item.url) || seen.has(item.url)) continue;
+    seen.add(item.url);
+    combined.push(item);
+  }
+  if (combined.length) return combined.slice(0, 8);
+  return searchRedditDirect(query);
 }
 
+/** Real Quora question threads via DataForSEO Google SERP — never fake search-page links. */
 async function searchQuora(query: string, country: string, language: string): Promise<DiscoveredThread[]> {
-  try {
-    const serp = await liveTop10(`site:quora.com ${query}`, country, language);
-    const hits = (serp?.results ?? []).filter((r) => /quora\.com/i.test(r.url));
-    if (hits.length) {
-      return hits.slice(0, 6).map((r) => ({
-        platform: "quora" as const,
-        title: String(r.title || r.url).replace(/\s*-\s*Quora$/i, "").slice(0, 290),
-        url: r.url.slice(0, 690),
-        community: "Quora",
-        snippet: `Google #${r.position} Quora thread for “${query}”.`,
-      }));
-    }
-  } catch { /* try broad query */ }
-
-  try {
-    const broad = await liveTop10(`quora ${query}`, country, language);
-    const hits = (broad?.results ?? []).filter((r) => /quora\.com/i.test(r.url));
-    if (hits.length) {
-      return hits.slice(0, 6).map((r) => ({
-        platform: "quora" as const,
-        title: String(r.title || r.url).replace(/\s*-\s*Quora$/i, "").slice(0, 290),
-        url: r.url.slice(0, 690),
-        community: "Quora",
-        snippet: `Google #${r.position} Quora question for “${query}”.`,
-      }));
-    }
-  } catch { /* fall back to direct search link */ }
-
-  const clean = query.trim();
-  if (!clean) return [];
-  return [
-    {
-      platform: "quora",
-      title: `Quora questions about “${clean}”`,
-      url: `https://www.quora.com/search?q=${encodeURIComponent(clean)}&type=question`,
-      community: "Quora Search",
-      snippet: "Open live Quora questions for this topic, pick an active question, and use the AI draft below.",
-    },
-  ];
+  const items = await serpSearch(`site:quora.com ${query}`, country, language, 20);
+  const hits = items.filter((r) => /quora\.com\/[^/?#]+/i.test(r.url) && !BAD_QUORA_PATH_RE.test(r.url));
+  return hits.slice(0, 6).map((r) => ({
+    platform: "quora" as const,
+    title: String(r.title || r.url).replace(/\s*-\s*Quora$/i, "").trim().slice(0, 290),
+    url: r.url.slice(0, 690),
+    community: "Quora",
+    snippet: (r.description || `Google #${r.position} Quora question for “${query}”.`).slice(0, 500),
+  }));
 }
 
 /**
- * Find fresh Reddit & Quora discussion opportunities for a project and save new ones to DB.
+ * Find real Reddit posts & Quora questions for a keyword and save new ones to DB.
+ * Never inserts fake search-page links.
  */
 export async function discoverOutreach(
   project: Project,
@@ -220,10 +173,27 @@ export async function discoverOutreach(
   platformFilter: "all" | "reddit" | "quora" = "all",
 ) {
   await ensureAddonTables();
+
+  // Clean up any legacy generic /search?q= placeholder rows for this user
+  await db()
+    .delete(schema.outreachItems)
+    .where(
+      and(
+        eq(schema.outreachItems.userId, userId),
+        or(
+          like(schema.outreachItems.url, "%reddit.com/search/%"),
+          like(schema.outreachItems.url, "%quora.com/search?%"),
+        ),
+      ),
+    );
+
   let query = (topicOverride ?? "").trim();
   if (!query) {
     const kws = await db().select().from(schema.keywords).where(eq(schema.keywords.projectId, project.id)).limit(3);
-    query = kws.length ? kws[0].keyword : project.name;
+    query = kws.length ? kws[0].keyword : "";
+  }
+  if (!query) {
+    return { added: 0, alreadySaved: 0, query: "", needsKeyword: true };
   }
 
   const tasks: Promise<DiscoveredThread[]>[] = [];
@@ -235,7 +205,7 @@ export async function discoverOutreach(
   }
 
   const found = (await Promise.all(tasks)).flat();
-  if (!found.length) return { added: 0, alreadySaved: 0, query };
+  if (!found.length) return { added: 0, alreadySaved: 0, query, needsKeyword: false };
 
   const existing = await db()
     .select({ url: schema.outreachItems.url })
@@ -266,31 +236,32 @@ export async function discoverOutreach(
     });
     added++;
   }
-  return { added, alreadySaved, query };
+  return { added, alreadySaved, query, needsKeyword: false };
 }
 
 /**
- * Generate a helpful, non-spammy, human-sounding reply draft for a Reddit or Quora thread.
+ * Generate a helpful, non-spammy, human-sounding reply draft tailored to the actual Reddit post or Quora question.
  */
 export async function draftOutreachReply(item: OutreachItem, project: Project): Promise<string> {
   const isReddit = item.platform === "reddit";
   const system = isReddit
-    ? `You write helpful, authentic Reddit comments for a founder/practitioner. Rules:
-- Answer the person's actual question directly with 2-4 concrete, practical tips first.
-- Sound like a real human peer on Reddit (concise, no marketing buzzwords, no "Check out our amazing tool!").
-- Mention ${project.name} (${project.url}) naturally at most ONCE as one option or a tool you built/use, with transparent context (e.g. "full disclosure, I work on ${project.name}").
+    ? `You write helpful, authentic Reddit comments replying directly to a specific Reddit post. Rules:
+- Address the OP's exact question or pain point first with 2-4 concrete, practical tips.
+- Sound like a real human peer on Reddit (concise, zero marketing hype, no "Check out our amazing tool!").
+- Mention ${project.name} (${project.url}) naturally at most ONCE as one relevant option with transparent disclosure (e.g. "full disclosure, I built/work on ${project.name}").
 - Keep it 90-160 words. Return plain text only.`
-    : `You write clear, authoritative Quora answers for an industry practitioner. Rules:
+    : `You write clear, authoritative Quora answers replying directly to a specific Quora question. Rules:
 - Start with a direct 1-2 sentence answer, then 3-4 concise bullet points with real value.
 - Mention ${project.name} (${project.url}) naturally as a helpful resource where relevant (never salesy).
 - Keep it 140-220 words. Return plain text only.`;
 
   const prompt = `Platform: ${item.platform} (${item.community})
-Thread title: ${item.title}
-Thread context: ${item.snippet || "(no extra body text)"}
+Post/Question title: ${item.title}
+Post URL: ${item.url}
+Post context/snippet: ${item.snippet || "(no extra body text)"}
 My website/brand: ${project.name} — ${project.url} (${project.domain})
 
-Write a genuinely helpful reply that I can review, edit, and post myself.`;
+Write a genuinely helpful reply directly answering this post so I can review, edit, and post it myself.`;
 
   const res = await complete({ system, prompt, maxTokens: 700 });
   const draft = res.text.trim();

@@ -102,7 +102,7 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
                     <option key={p.id} value={p.id}>{p.name} ({p.domain})</option>
                   ))}
                 </select>
-                <input name="topic" placeholder="Keyword or topic (optional — uses tracked keywords)" className="input lg:col-span-2" />
+                <input name="topic" required placeholder='Enter niche keyword (e.g. "ai chatbot", "seo audit tool")' className="input lg:col-span-2" />
                 <div className="flex gap-2">
                   <select name="platform" defaultValue="all" className="input !w-auto">
                     <option value="all">Both</option>
@@ -185,7 +185,7 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
                         </h3>
                         {item.snippet && <p className="muted mt-1.5 line-clamp-3 break-words text-[13.5px]">{item.snippet}</p>}
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap items-start gap-2">
                         <ActionForm action={generateDraftAction}>
                           <input type="hidden" name="itemId" value={item.id} />
                           <SubmitButton className="btn" pendingText="Drafting…">
