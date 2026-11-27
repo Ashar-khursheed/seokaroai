@@ -1,12 +1,40 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Icon } from "./icons";
+
+interface ChatCard {
+  badge?: string;
+  title: string;
+  description: string;
+  href: string;
+  cta: string;
+}
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  cards?: ChatCard[];
+  suggestions?: string[];
 }
+
+const INITIAL_CARDS: ChatCard[] = [
+  {
+    badge: "100% Free",
+    title: "Free Website SEO Checker",
+    description: "Check any URL instantly — no signup required.",
+    href: "/website-seo-checker",
+    cta: "Try Free Checker",
+  },
+  {
+    badge: "Plans from $0/mo",
+    title: "Pricing & Plans",
+    description: "Compare Free, Starter, Pro, Agency & Outreach Add-on.",
+    href: "/pricing",
+    cta: "View Pricing",
+  },
+];
 
 const QUICK_PROMPTS = [
   "What does SEOKaroAI do?",
@@ -16,14 +44,22 @@ const QUICK_PROMPTS = [
 ];
 
 function renderText(text: string) {
-  // Render simple **bold** and clickable /paths cleanly without dangerouslySetInnerHTML
-  const parts = text.split(/(\*\*[^*]+\*\*|\/(?:pricing|signup|tutorials|features\/[a-z0-9-]+|compare\/[a-z0-9-]+|integrations\/[a-z0-9-]+))/g);
+  const parts = text.split(
+    /(\*\*[^*]+\*\*|`[^`]+`|\/(?:pricing|signup|tutorials|security|case-studies|contact|website-seo-checker|seo-audit-tool|site-audit-tool|features\/[a-z0-9-]+|compare\/[a-z0-9-]+|integrations\/[a-z0-9-]+))/g,
+  );
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-semibold text-[var(--ink)]">{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return <code key={i} className="rounded bg-slate-200/70 px-1 py-0.5 font-mono text-[12px]">{part.slice(1, -1)}</code>;
     }
     if (part.startsWith("/")) {
-      return <a key={i} href={part} className="font-medium text-brand-500 underline underline-offset-2 hover:opacity-80">{part}</a>;
+      return (
+        <Link key={i} href={part} className="font-semibold text-brand-600 underline underline-offset-2 hover:opacity-80">
+          {part}
+        </Link>
+      );
     }
     return <span key={i}>{part}</span>;
   });
@@ -35,7 +71,10 @@ export function SeoKaroChatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! 👋 I'm **SEOKaroAI's assistant**. Ask me anything about AI SEO audits, Auto-Fix (WordPress, Shopify, GitHub PRs), Keyword Battles, pricing, or leave your inquiry for our team!",
+      content:
+        "Hi! 👋 I’m **SEOKaroAI’s official guide**. Ask me about our SEO Audits, Free Checker, WordPress/Shopify/GitHub Auto-Fix, Rank Tracking, Pricing, or leave your inquiry for our team.",
+      cards: INITIAL_CARDS,
+      suggestions: QUICK_PROMPTS,
     },
   ]);
   const [input, setInput] = useState("");
@@ -65,18 +104,34 @@ export function SeoKaroChatbot() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({
+          messages: next.map((m) => ({ role: m.role, content: m.content })),
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setMessages((m) => [...m, { role: "assistant", content: data?.error || "Something went wrong. You can submit your inquiry below!" }]);
+        setMessages((m) => [
+          ...m,
+          { role: "assistant", content: data?.error || "Something went wrong. You can submit your inquiry below!" },
+        ]);
         setShowLead(true);
       } else {
-        setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+        setMessages((m) => [
+          ...m,
+          {
+            role: "assistant",
+            content: data.reply,
+            cards: Array.isArray(data.cards) ? data.cards : undefined,
+            suggestions: Array.isArray(data.suggestions) ? data.suggestions : undefined,
+          },
+        ]);
         if (data.showLeadForm && !leadSent) setShowLead(true);
       }
     } catch {
-      setMessages((m) => [...m, { role: "assistant", content: "Connection interrupted — leave your details below and our team will reach out right away." }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: "Connection interrupted — leave your details below and our team will reach out right away." },
+      ]);
       setShowLead(true);
     } finally {
       setSending(false);
@@ -114,7 +169,7 @@ export function SeoKaroChatbot() {
           ...m,
           {
             role: "assistant",
-            content: `Thanks **${leadName}**! ✅ Your inquiry has been sent to **info@seokaroai.com**. Our team will contact you shortly!`,
+            content: `Thanks **${leadName}**! Your inquiry has been sent to **info@seokaroai.com**. Our team will contact you shortly.`,
           },
         ]);
       }
@@ -132,7 +187,7 @@ export function SeoKaroChatbot() {
         <div
           role="dialog"
           aria-label="SEOKaroAI Assistant"
-          className="panel flex h-[min(82vh,580px)] w-[min(92vw,390px)] flex-col overflow-hidden shadow-2xl shadow-black/40"
+          className="panel flex h-[min(84vh,600px)] w-[min(93vw,400px)] flex-col overflow-hidden shadow-2xl shadow-slate-900/20"
         >
           {/* Header */}
           <div className="flex items-center gap-3 border-b line bg-[var(--panel)] px-4 py-3">
@@ -141,9 +196,9 @@ export function SeoKaroChatbot() {
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-low ring-2 ring-[var(--panel)]" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[14px] font-semibold">SEOKaroAI Assistant</div>
+              <div className="truncate text-[14px] font-semibold">SEOKaroAI Guide</div>
               <div className="muted flex items-center gap-1.5 text-[11.5px]">
-                <span className="h-1.5 w-1.5 rounded-full bg-low" />Online · Replies instantly
+                <span className="h-1.5 w-1.5 rounded-full bg-low" />SEOKaroAI Product &amp; Pricing Help
               </div>
             </div>
             {!leadSent && (
@@ -166,36 +221,73 @@ export function SeoKaroChatbot() {
           </div>
 
           {/* Messages */}
-          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-3.5 py-3.5 text-[13.5px]">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 leading-relaxed ${
-                    m.role === "user"
-                      ? "rounded-br-md bg-brand-500 text-white"
-                      : "rounded-bl-md border line bg-[var(--panel2)] text-[var(--ink)]"
-                  }`}
-                >
-                  {m.role === "user" ? m.content : renderText(m.content)}
-                </div>
-              </div>
-            ))}
+          <div ref={listRef} className="flex-1 space-y-3.5 overflow-y-auto px-3.5 py-3.5 text-[13.5px]">
+            {messages.map((m, i) => {
+              const isLast = i === messages.length - 1;
+              return (
+                <div key={i} className="space-y-2">
+                  <div className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[90%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 leading-relaxed ${
+                        m.role === "user"
+                          ? "rounded-br-md bg-brand-500 text-white"
+                          : "rounded-bl-md border line bg-[var(--panel2)] text-[var(--ink)]"
+                      }`}
+                    >
+                      {m.role === "user" ? m.content : renderText(m.content)}
+                    </div>
+                  </div>
 
-            {/* Quick starter chips on initial state */}
-            {messages.length === 1 && !sending && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {QUICK_PROMPTS.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => void sendMessage(q)}
-                    className="rounded-full border line bg-[var(--bg-elev)] px-3 py-1.5 text-[12px] font-medium transition hover:border-brand-500 hover:text-brand-500"
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            )}
+                  {/* Rich Clickable Product / Action Cards */}
+                  {m.role === "assistant" && m.cards && m.cards.length > 0 && (
+                    <div className="grid gap-2 pl-0.5">
+                      {m.cards.map((c) => (
+                        <Link
+                          key={c.href + c.title}
+                          href={c.href}
+                          onClick={() => setOpen(false)}
+                          className="group block rounded-xl border line bg-white p-3 transition hover:border-brand-500 hover:shadow-sm"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              {c.badge && (
+                                <span className="inline-block rounded-full bg-brand-50 px-2 py-0.5 text-[10.5px] font-semibold text-brand-700">
+                                  {c.badge}
+                                </span>
+                              )}
+                              <div className="mt-1 text-[13px] font-semibold text-slate-900 group-hover:text-brand-600">
+                                {c.title}
+                              </div>
+                              <p className="muted mt-0.5 text-[12px] leading-snug">{c.description}</p>
+                            </div>
+                            <Icon name="ArrowUpRight" size={15} className="mt-1 shrink-0 text-slate-400 transition group-hover:text-brand-600" />
+                          </div>
+                          <div className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-semibold text-brand-600">
+                            {c.cta} <Icon name="ArrowRight" size={12} />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Follow-up Suggestion Chips (only on latest assistant message) */}
+                  {isLast && m.role === "assistant" && m.suggestions && m.suggestions.length > 0 && !sending && (
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {m.suggestions.map((q) => (
+                        <button
+                          key={q}
+                          type="button"
+                          onClick={() => void sendMessage(q)}
+                          className="rounded-full border line bg-white px-3 py-1.5 text-[11.5px] font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-600"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
             {/* Typing indicator */}
             {sending && (
@@ -210,9 +302,9 @@ export function SeoKaroChatbot() {
 
             {/* Inline Lead / Inquiry Form */}
             {showLead && !leadSent && (
-              <form onSubmit={submitLead} className="space-y-2.5 rounded-2xl border border-brand-500/40 bg-[var(--bg-elev)] p-3.5 shadow-sm">
+              <form onSubmit={submitLead} className="space-y-2.5 rounded-2xl border border-brand-500/40 bg-white p-3.5 shadow-sm">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[12.5px] font-semibold text-brand-500">Get a callback / Send inquiry</span>
+                  <span className="text-[12.5px] font-semibold text-brand-600">Get a callback / Send inquiry</span>
                   <button type="button" onClick={() => setShowLead(false)} className="muted text-xs hover:text-[var(--ink)]">Later</button>
                 </div>
                 <input
@@ -264,41 +356,33 @@ export function SeoKaroChatbot() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about SEOKaroAI…"
-              className="input !rounded-xl !py-2 text-[13.5px]"
+              placeholder="Ask about SEOKaroAI audits, pricing, Auto-Fix…"
+              className="input !py-2 text-[13.5px]"
               disabled={sending}
             />
             <button
               type="submit"
               disabled={sending || !input.trim()}
-              className="btn btn-brand shrink-0 !rounded-xl !px-3.5 !py-2"
+              className="btn btn-brand shrink-0 !px-3.5 !py-2"
               aria-label="Send message"
             >
-              <Icon name="ArrowRight" size={16} />
+              <Icon name="ArrowRight" size={15} />
             </button>
           </form>
         </div>
       )}
 
-      {/* Greeting pill when closed */}
+      {/* Friendly Greeting Pill */}
       {!open && showBubble && (
-        <div className="panel flex items-center gap-2 rounded-full px-3.5 py-2 text-[12.5px] font-medium shadow-xl">
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(true);
-              setShowBubble(false);
-            }}
-            className="flex items-center gap-1.5 text-left"
-          >
-            <span className="wave-hand inline-block">👋</span>
-            <span>Need SEO help? Ask SEOKaroAI</span>
+        <div className="panel flex items-center gap-2 rounded-full px-3.5 py-2 text-[12.5px] shadow-lg">
+          <button type="button" onClick={() => { setOpen(true); setShowBubble(false); }} className="text-left font-medium">
+            👋 Need SEO help? Ask SEOKaroAI
           </button>
           <button
             type="button"
             onClick={() => setShowBubble(false)}
-            className="muted ml-1 hover:text-[var(--ink)]"
             aria-label="Dismiss greeting"
+            className="muted hover:text-[var(--ink)]"
           >
             <Icon name="X" size={13} />
           </button>
@@ -313,7 +397,7 @@ export function SeoKaroChatbot() {
           setShowBubble(false);
         }}
         aria-label={open ? "Close SEOKaroAI chat" : "Open SEOKaroAI chat"}
-        className="group relative grid h-14 w-14 place-items-center rounded-full border border-brand-500/40 bg-[var(--panel)] shadow-2xl shadow-brand-500/30 transition hover:scale-105 active:scale-95 sm:h-16 sm:w-16"
+        className="group relative grid h-14 w-14 place-items-center rounded-full border border-brand-500/40 bg-[var(--panel)] shadow-2xl shadow-brand-500/20 transition hover:scale-105 active:scale-95 sm:h-16 sm:w-16"
       >
         <span className="pointer-events-none absolute -inset-1 rounded-full bg-brand-500/15 opacity-75 blur-md transition group-hover:opacity-100" />
         <img
