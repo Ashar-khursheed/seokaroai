@@ -315,7 +315,7 @@ export function SeoKaroChatbot() {
         aria-label={open ? "Close SEOKaroAI chat" : "Open SEOKaroAI chat"}
         className="group relative grid h-14 w-14 place-items-center rounded-full border border-brand-500/40 bg-[var(--panel)] shadow-2xl shadow-brand-500/30 transition hover:scale-105 active:scale-95 sm:h-16 sm:w-16"
       >
-        <span className="pointer-events-none absolute -inset-1 rounded-full bg-gradient-to-tr from-brand-500/30 to-teal-400/25 opacity-75 blur-md transition group-hover:opacity-100" />
+        <span className="pointer-events-none absolute -inset-1 rounded-full bg-brand-500/15 opacity-75 blur-md transition group-hover:opacity-100" />
         <img
           src="/brand/logo-mark-128.webp"
           alt="SEOKaroAI Assistant"

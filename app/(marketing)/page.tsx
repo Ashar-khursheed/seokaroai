@@ -104,7 +104,7 @@ export default function Home() {
 
             {/* Instant Interactive URL Audit Bar */}
             <form
-              action="/features/website-seo-checker"
+              action="/website-seo-checker"
               method="GET"
               className="animate-fade-up mx-auto mt-8 flex max-w-xl flex-col gap-2 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-[0_18px_50px_-18px_rgba(15,17,23,0.18)] sm:flex-row sm:rounded-full"
               style={{ animationDelay: "200ms" }}
@@ -291,7 +291,7 @@ export default function Home() {
                   {[42, 48, 53, 61, 68, 76, 82, 92].map((h, idx) => (
                     <div
                       key={idx}
-                      className="flex-1 rounded-t-md bg-gradient-to-t from-violet-600 via-indigo-500 to-emerald-400"
+                      className="flex-1 rounded-t-md bg-brand-500"
                       style={{ height: `${h}%` }}
                     />
                   ))}
@@ -388,12 +388,12 @@ export default function Home() {
             </h2>
             <div className="space-y-3 pt-2">
               {[
-                { num: 47, suffix: "+", label: "Deterministic on-page, technical & CWV checks per audit", grad: "from-emerald-400 to-violet-500" },
-                { num: 12, suffix: "+", label: "Specialist AI agents running in parallel on Deep Audits", grad: "from-violet-500 to-indigo-500" },
-                { num: 100, suffix: "", label: "Live Google positions tracked daily by country & language", grad: "from-teal-400 to-blue-500" },
+                { num: 47, suffix: "+", label: "Deterministic on-page, technical & CWV checks per audit", bg: "bg-emerald-600" },
+                { num: 12, suffix: "+", label: "Specialist AI agents running in parallel on Deep Audits", bg: "bg-brand-600" },
+                { num: 100, suffix: "", label: "Live Google positions tracked daily by country & language", bg: "bg-slate-900" },
               ].map((m) => (
                 <div key={m.label} className="flex items-center gap-4">
-                  <div className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${m.grad} text-white shadow-md`}>
+                  <div className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl ${m.bg} text-white shadow-md`}>
                     <Icon name="TrendingUp" size={22} />
                   </div>
                   <div className="flex min-w-0 flex-1 items-baseline gap-3 rounded-2xl bg-[#0f1117] px-5 py-3 text-white shadow-md">
@@ -448,15 +448,15 @@ export default function Home() {
             </div>
             <div className="space-y-3 text-xs sm:text-[13px]">
               {[
-                ["GPTBot & OAI-SearchBot (ChatGPT)", 96, "from-emerald-400 to-teal-500"],
-                ["ClaudeBot & Claude-SearchBot", 94, "from-violet-500 to-indigo-500"],
-                ["PerplexityBot & Google-Extended", 92, "from-blue-500 to-cyan-400"],
-                ["llms.txt + Organization JSON-LD", 90, "from-fuchsia-500 to-violet-500"],
-              ].map(([name, val, grad]) => (
+                ["GPTBot & OAI-SearchBot (ChatGPT)", 96, "bg-emerald-500"],
+                ["ClaudeBot & Claude-SearchBot", 94, "bg-brand-500"],
+                ["PerplexityBot & Google-Extended", 92, "bg-sky-500"],
+                ["llms.txt + Organization JSON-LD", 90, "bg-slate-800"],
+              ].map(([name, val, barBg]) => (
                 <div key={String(name)} className="grid grid-cols-[160px_1fr_42px] items-center gap-3 sm:grid-cols-[240px_1fr_48px]">
                   <span className="truncate font-semibold text-slate-700">{name}</span>
                   <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
-                    <div className={`h-full rounded-full bg-gradient-to-r ${grad}`} style={{ width: `${val}%` }} />
+                    <div className={`h-full rounded-full ${barBg}`} style={{ width: `${val}%` }} />
                   </div>
                   <span className="text-right font-bold tabular-nums text-slate-900">{val}%</span>
                 </div>
@@ -544,10 +544,10 @@ export default function Home() {
         </div>
 
         {/* Reddit & Quora Paid Add-on Banner */}
-        <div className="panel mt-6 flex flex-col items-start justify-between gap-4 border-violet-200 bg-gradient-to-r from-violet-50/70 via-white to-emerald-50/60 p-5 sm:flex-row sm:items-center sm:p-6">
+        <div className="panel mt-6 flex flex-col items-start justify-between gap-4 border-brand-500/25 bg-slate-50 p-5 sm:flex-row sm:items-center sm:p-6">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-violet-600 px-2.5 py-0.5 text-[11px] font-bold text-white">Paid Add-on · $29/mo</span>
+              <span className="rounded-full bg-brand-600 px-2.5 py-0.5 text-[11px] font-bold text-white">Paid Add-on · $29/mo</span>
               <span className="font-bold text-slate-900">Reddit &amp; Quora Outreach</span>
             </div>
             <p className="muted mt-1.5 text-[14px]">Sold separately on any plan: discover high-intent Reddit threads &amp; Quora questions for your keywords, draft natural value-first replies with AI, and track brand mentions safely.</p>
