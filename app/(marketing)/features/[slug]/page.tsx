@@ -18,7 +18,13 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const f = featureBySlug((await params).slug);
   if (!f) return {};
-  return { title: f.metaTitle, description: f.metaDescription, alternates: { canonical: `/features/${f.slug}` }, openGraph: { title: f.metaTitle, description: f.metaDescription, images: [`${config.appUrl}/opengraph-image`] } };
+  return {
+    title: f.metaTitle,
+    description: f.metaDescription,
+    alternates: { canonical: `/features/${f.slug}`, languages: { en: `/features/${f.slug}`, "x-default": `/features/${f.slug}` } },
+    openGraph: { title: f.metaTitle, description: f.metaDescription, images: [`${config.appUrl}/opengraph-image`] },
+    twitter: { card: "summary_large_image", title: f.metaTitle, description: f.metaDescription, images: [`${config.appUrl}/opengraph-image`] },
+  };
 }
 
 export default async function FeaturePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -115,6 +121,28 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
             {s.points && <ul className="mt-5 space-y-3">{s.points.map((p) => <li key={p} className="flex gap-3 text-[15px]"><Icon name="ArrowRight" size={15} className="mt-1 shrink-0 text-brand-500" />{p}</li>)}</ul>}
           </Reveal>
         ))}
+        <Reveal>
+          <div className="panel p-5 sm:p-6">
+            <div className="text-xs font-bold uppercase tracking-wider text-brand-500">Sample Audit Proof &amp; Shipped Diff</div>
+            <h2 className="mt-2 text-lg font-semibold sm:text-xl">Real evidence — not vague warnings</h2>
+            <p className="muted mt-1.5 text-[14px]">Every finding cites the exact URL, observed value, and ready-to-merge fix. Here is an example of what SEOKaroAI catches and ships via Pull Request:</p>
+            <div className="table-wrap mt-4">
+              <table className="w-full min-w-[520px] text-[13px]">
+                <thead><tr className="muted border-b line text-left text-xs"><th className="py-2 pr-3">Category</th><th className="pr-3">Observed issue</th><th>Action shipped</th></tr></thead>
+                <tbody>
+                  <tr className="border-b line"><td className="py-2 pr-3 font-medium">On-Page SEO</td><td className="wrap pr-3 muted">/pricing meta description 198 chars (truncated in SERP)</td><td className="wrap text-low">Trimmed to 146 chars with CTA via PR</td></tr>
+                  <tr className="border-b line"><td className="py-2 pr-3 font-medium">Schema</td><td className="wrap pr-3 muted">Missing Product/Offer &amp; FAQPage JSON-LD on pricing</td><td className="wrap text-low">Injected validated JSON-LD graph</td></tr>
+                  <tr><td className="py-2 pr-3 font-medium">AI Search (GEO)</td><td className="wrap pr-3 muted">No TL;DR answer block or llms.txt index</td><td className="wrap text-low">Published /llms.txt + direct-answer summary</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3 text-xs font-medium">
+              <Link href="/features/website-seo-checker" className="text-brand-500 hover:underline">Run free instant SEO checker →</Link>
+              <Link href="/compare/seokaroai-vs-semrush" className="text-brand-500 hover:underline">Compare SEOKaroAI vs Semrush →</Link>
+              <Link href="/integrations/github" className="text-brand-500 hover:underline">See GitHub Auto-Fix PR security →</Link>
+            </div>
+          </div>
+        </Reveal>
         <Reveal>
           <h2 className="mb-6 break-words text-xl font-semibold tracking-[-0.025em] sm:text-2xl">{f.name}: common questions</h2>
           <FaqList faqs={f.faqs} />

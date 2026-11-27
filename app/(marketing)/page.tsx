@@ -11,7 +11,7 @@ import { Icon } from "@/components/icons";
 export const metadata: Metadata = {
   title: { absolute: "SEOKaroAI: AI SEO Audit Tool, Rank Tracker & Auto-Fix" },
   description: "AI SEO audit tool that audits your site, tracks rankings, and ships fixes to WordPress, Shopify or GitHub. Start a free audit.",
-  alternates: { canonical: "/" },
+  alternates: { canonical: "/", languages: { en: "/", "x-default": "/" } },
 };
 
 const CHECKS = ["Crawlability", "Indexing", "Canonicals", "Sitemaps", "robots.txt", "Core Web Vitals", "E-E-A-T", "Thin content", "Schema", "Hreflang", "Alt text", "Internal links", "AI crawlers", "llms.txt", "Security headers", "Search intent", "Competitor gaps", "Content briefs"];
@@ -111,6 +111,7 @@ export default function Home() {
             </p>
             <div className="animate-fade-up mt-9 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap" style={{ animationDelay: "240ms" }}>
               <Link href="/signup" className="btn btn-brand w-full justify-center px-6 py-3 text-[15px] sm:w-auto">Audit my website free <Icon name="ArrowRight" size={16} /></Link>
+              <Link href="/features/website-seo-checker" className="btn w-full justify-center px-6 py-3 text-[15px] sm:w-auto"><Icon name="SearchCheck" size={16} />Free instant SEO checker</Link>
               <Link href="/features/keyword-battle" className="btn w-full justify-center px-6 py-3 text-[15px] sm:w-auto">See how it compares pages</Link>
             </div>
             <p className="muted animate-fade-up mt-5 text-[13px]" style={{ animationDelay: "320ms" }}>Free plan · no credit card · cancel anytime</p>
@@ -278,6 +279,44 @@ export default function Home() {
           <Link href="/tutorials" className="btn w-full shrink-0 sm:w-auto">All 8 video tutorials <Icon name="ArrowRight" size={15} /></Link>
         </div>
         <HomeTutorialsSection />
+        <div className="panel mt-8 grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4 sm:p-6">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-brand-500">Core SEO Tools</div>
+            <ul className="mt-2.5 space-y-1.5 text-[13.5px]">
+              <li><Link href="/features/ai-seo-audit" className="hover:text-brand-500">AI SEO Audit (12+ Agents)</Link></li>
+              <li><Link href="/features/website-seo-checker" className="hover:text-brand-500">Free Instant SEO Checker</Link></li>
+              <li><Link href="/features/rank-tracker" className="hover:text-brand-500">Daily Google Rank Tracker</Link></li>
+              <li><Link href="/features/keyword-battle" className="hover:text-brand-500">Keyword Battle vs Top 3</Link></li>
+            </ul>
+          </div>
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-brand-500">Auto-Fix &amp; Integrations</div>
+            <ul className="mt-2.5 space-y-1.5 text-[13.5px]">
+              <li><Link href="/features/seo-auto-fix" className="hover:text-brand-500">AI Auto-Fix Overview</Link></li>
+              <li><Link href="/integrations/wordpress" className="hover:text-brand-500">WordPress SEO Auto-Fix</Link></li>
+              <li><Link href="/integrations/shopify" className="hover:text-brand-500">Shopify Product SEO Fix</Link></li>
+              <li><Link href="/integrations/github" className="hover:text-brand-500">GitHub PR Auto-Fix &amp; Gatekeeper</Link></li>
+            </ul>
+          </div>
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-brand-500">Comparisons</div>
+            <ul className="mt-2.5 space-y-1.5 text-[13.5px]">
+              <li><Link href="/compare/seokaroai-vs-semrush" className="hover:text-brand-500">SEOKaroAI vs Semrush</Link></li>
+              <li><Link href="/compare/seokaroai-vs-ahrefs" className="hover:text-brand-500">SEOKaroAI vs Ahrefs</Link></li>
+              <li><Link href="/compare/semrush-alternatives" className="hover:text-brand-500">Best Semrush Alternatives</Link></li>
+              <li><Link href="/pricing" className="hover:text-brand-500">Transparent Plan Pricing</Link></li>
+            </ul>
+          </div>
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-brand-500">AI Search &amp; Guides</div>
+            <ul className="mt-2.5 space-y-1.5 text-[13.5px]">
+              <li><Link href="/features/ai-search-optimization" className="hover:text-brand-500">AI Search Optimization (GEO)</Link></li>
+              <li><Link href="/features/seo-reports" className="hover:text-brand-500">Automated PDF &amp; HTML Reports</Link></li>
+              <li><Link href="/tutorials" className="hover:text-brand-500">Interactive Video Tutorials</Link></li>
+              <li><Link href="/blog" className="hover:text-brand-500">SEO Guides &amp; Playbooks</Link></li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       {/* Pricing teaser */}

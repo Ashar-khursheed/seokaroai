@@ -6,6 +6,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.appUrl),
+  alternates: {
+    languages: {
+      en: "/",
+      "x-default": "/",
+    },
+  },
   title: { default: "SEOKaroAI: AI SEO Audit, Rank Tracker & Competitor Analysis", template: "%s | SEOKaroAI" },
   description:
     "SEOKaroAI audits your website with a team of AI SEO agents, tracks your Google rankings daily, shows what the top 3 results do that your page does not, and fixes issues directly in WordPress, Shopify or your code.",

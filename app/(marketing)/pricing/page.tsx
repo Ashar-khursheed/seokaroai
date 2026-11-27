@@ -7,7 +7,7 @@ import { CtaBand, FaqList, JsonLd } from "@/components/marketing";
 export const metadata: Metadata = {
   title: "Pricing: Free, Starter, Pro and Agency Plans",
   description: "SEOKaroAI plans: start free, then upgrade for AI deep audits, keyword battles, and daily rank tracking. Try a free audit today.",
-  alternates: { canonical: "/pricing" },
+  alternates: { canonical: "/pricing", languages: { en: "/pricing", "x-default": "/pricing" } },
 };
 
 const ROWS: [string, (c: PlanCode) => string][] = [
@@ -37,14 +37,48 @@ export default function Pricing() {
   const codes: PlanCode[] = ["free", ...PAID_PLANS];
   return (
     <>
-      <JsonLd data={{
-        "@context": "https://schema.org", "@type": "SoftwareApplication", name: "SEOKaroAI", applicationCategory: "BusinessApplication",
-        operatingSystem: "Web", url: config.appUrl, publisher: { "@id": `${config.appUrl}/#organization` },
-        offers: codes.map((c) => ({
-          "@type": "Offer", name: PLANS[c].name, price: String(PLANS[c].priceMonthly), priceCurrency: "USD", url: `${config.appUrl}/pricing`,
-          priceSpecification: { "@type": "UnitPriceSpecification", price: String(PLANS[c].priceMonthly), priceCurrency: "USD", billingDuration: "P1M" },
-        })),
-      }} />
+      <JsonLd data={[
+        {
+          "@context": "https://schema.org", "@type": "SoftwareApplication", name: "SEOKaroAI", applicationCategory: "BusinessApplication",
+          operatingSystem: "Web", url: config.appUrl, publisher: { "@id": `${config.appUrl}/#organization` },
+          offers: codes.map((c) => ({
+            "@type": "Offer", name: PLANS[c].name, price: String(PLANS[c].priceMonthly), priceCurrency: "USD", availability: "https://schema.org/InStock", url: `${config.appUrl}/pricing`,
+            priceSpecification: { "@type": "UnitPriceSpecification", price: String(PLANS[c].priceMonthly), priceCurrency: "USD", billingDuration: "P1M" },
+          })),
+        },
+        {
+          "@context": "https://schema.org", "@type": "Product", name: "SEOKaroAI SEO Platform",
+          description: "AI SEO audit tool, daily Google rank tracker, Keyword Battle competitor analysis, and automated WordPress, Shopify & GitHub SEO fixes.",
+          brand: { "@type": "Brand", name: "SEOKaroAI" },
+          image: `${config.appUrl}/opengraph-image`,
+          url: `${config.appUrl}/pricing`,
+          offers: {
+            "@type": "AggregateOffer",
+            lowPrice: "0",
+            highPrice: "249",
+            priceCurrency: "USD",
+            offerCount: codes.length,
+            offers: codes.map((c) => ({
+              "@type": "Offer",
+              name: `SEOKaroAI ${PLANS[c].name} Plan`,
+              price: String(PLANS[c].priceMonthly),
+              priceCurrency: "USD",
+              availability: "https://schema.org/InStock",
+              url: `${config.appUrl}/pricing`,
+            })),
+          },
+        },
+        {
+          "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: `${config.appUrl}/` },
+            { "@type": "ListItem", position: 2, name: "Pricing", item: `${config.appUrl}/pricing` },
+          ],
+        },
+        {
+          "@context": "https://schema.org", "@type": "FAQPage",
+          mainEntity: FAQS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+        },
+      ]} />
       <section className="mx-auto max-w-6xl px-4 pt-10 text-center sm:px-6 sm:pt-16">
         <h1 className="break-words text-[2.1rem] font-semibold leading-tight tracking-[-0.03em] sm:text-5xl">Pricing that pays for itself</h1>
         <p className="muted mx-auto mt-4 max-w-2xl text-base sm:text-lg">Start free on one website. Upgrade for AI deep audits, keyword battles, daily rank tracking and more websites. Yearly billing gives you 2 months free.</p>
