@@ -336,6 +336,16 @@ export default function Home() {
             );
           })}
         </div>
+        <div className="panel mt-6 flex flex-col items-start justify-between gap-4 border-brand-500/35 p-5 sm:flex-row sm:items-center sm:p-6">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="chip !py-0.5 text-brand-500">Paid Add-on · $29/mo</span>
+              <span className="font-semibold">Reddit &amp; Quora Outreach</span>
+            </div>
+            <p className="muted mt-1.5 text-[14px]">Sold separately on any plan: discover high-intent Reddit threads &amp; Quora questions for your keywords, draft natural value-first replies with AI, and track brand mentions safely.</p>
+          </div>
+          <Link href="/pricing" className="btn btn-brand w-full shrink-0 sm:w-auto">See add-on <Icon name="ArrowRight" size={15} /></Link>
+        </div>
         <div className="mt-8 text-center"><Link href="/pricing" className="btn">Compare all plans <Icon name="ArrowRight" size={15} /></Link></div>
       </section>
 
