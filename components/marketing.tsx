@@ -7,19 +7,19 @@ import { config } from "@/lib/config";
 
 export function MarketingHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b line backdrop-blur-xl" style={{ background: "color-mix(in oklab, var(--bg) 78%, transparent)" }}>
+    <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:h-16 sm:gap-6 sm:px-6">
         <Link href="/" aria-label="SEOKaroAI home" className="shrink-0"><Logo size={24} /></Link>
         <nav className="hidden items-center gap-1 text-[14px] md:flex" aria-label="Main">
           <div className="group relative">
-            <Link href="/features" className="muted flex items-center gap-1 rounded-lg px-3 py-2 transition hover:text-[var(--ink)]">
+            <Link href="/features" className="muted flex items-center gap-1 rounded-full px-3.5 py-2 font-medium transition hover:bg-[var(--panel2)] hover:text-[var(--ink)]">
               Product <Icon name="ArrowRight" size={13} className="rotate-90 transition group-hover:-rotate-90" />
             </Link>
-            <div className="invisible absolute left-0 top-full w-[620px] translate-y-1 pt-3 opacity-0 transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-              <div className="panel grid grid-cols-2 gap-1 p-2 shadow-2xl shadow-black/20">
+            <div className="invisible absolute left-0 top-full w-[640px] translate-y-1 pt-3 opacity-0 transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+              <div className="panel grid grid-cols-2 gap-1 p-2.5 shadow-2xl shadow-slate-900/10">
                 {FEATURES.map((f) => (
                   <Link key={f.slug} href={`/features/${f.slug}`} className="flex gap-3 rounded-xl p-3 transition hover:bg-[var(--panel2)]">
-                    <span className="mt-0.5 text-brand-500"><Icon name={f.icon} size={18} /></span>
+                    <span className="mt-0.5 text-violet-600"><Icon name={f.icon} size={18} /></span>
                     <span><span className="block text-sm font-semibold">{f.name}</span><span className="muted block text-xs leading-snug">{f.metaTitle.split(":")[1]?.trim() ?? f.metaTitle}</span></span>
                   </Link>
                 ))}
@@ -27,12 +27,12 @@ export function MarketingHeader() {
             </div>
           </div>
           {[["Tutorials", "/tutorials"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"]].map(([l, h]) => (
-            <Link key={h} href={h} className="muted rounded-lg px-3 py-2 transition hover:text-[var(--ink)]">{l}</Link>
+            <Link key={h} href={h} className="muted rounded-full px-3.5 py-2 font-medium transition hover:bg-[var(--panel2)] hover:text-[var(--ink)]">{l}</Link>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-          <Link href="/login" className="btn btn-ghost hidden sm:inline-flex">Log in</Link>
-          <Link href="/signup" className="btn btn-primary !px-3 sm:!px-[15px]">Start free <Icon name="ArrowRight" size={15} className="hidden min-[380px]:block" /></Link>
+          <Link href="/login" className="btn btn-ghost hidden !rounded-full sm:inline-flex">Log in</Link>
+          <Link href="/signup" className="btn btn-primary !rounded-full !px-4">Start free <Icon name="ArrowRight" size={15} className="hidden min-[380px]:block" /></Link>
           <div className="md:hidden">
             <MobileDrawer title={<Logo size={22} />}>
               <div className="p-3">
@@ -73,8 +73,15 @@ export function MarketingFooter() {
         <FooterCol title="Company" links={[["About", "/about"], ["Contact", "/contact"], ["Privacy", "/legal/privacy"], ["Terms", "/legal/terms"], ["Refunds", "/legal/refund"]]} />
       </div>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t line px-4 py-6 text-xs sm:px-6">
-        <span className="muted">© {new Date().getFullYear()} SEOKaroAI</span>
-        <span className="muted flex items-center gap-2"><span className="live-dot h-1.5 w-1.5 rounded-full bg-low" />All systems normal</span>
+        <span className="muted">© {new Date().getFullYear()} SEOKaroAI · All rights reserved</span>
+        <span className="muted flex items-center gap-2"><span className="live-dot h-1.5 w-1.5 rounded-full bg-low" />All systems operational</span>
+      </div>
+      <div className="footer-wordmark-bg overflow-hidden border-t line pt-8 sm:pt-12">
+        <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
+          <div className="select-none text-[clamp(3.2rem,14vw,10.5rem)] font-extrabold leading-[0.84] tracking-[-0.06em] text-[#0f1117]">
+            SEOKAROAI
+          </div>
+        </div>
       </div>
     </footer>
   );
