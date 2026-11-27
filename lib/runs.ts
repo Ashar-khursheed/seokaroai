@@ -18,6 +18,7 @@ then reply with a one-line summary. Only write_file calls are allowed now.`;
 import { makeGuard } from "@/lib/guard";
 import { auditPrompt, keywordPrompt, auditPhases, keywordPhases, type Phases } from "@/lib/prompts";
 import { liveTop10 } from "@/lib/engine/ranks";
+import { prefetchPageSpeed, type PageSpeedSummary } from "@/lib/engine/pagespeed";
 import { runQuickAudit, summarizeQuick } from "@/lib/engine/quick";
 import { sendMail } from "@/lib/email";
 import { runDoneEmail } from "@/lib/email/templates";
@@ -188,7 +189,43 @@ function summarizeDeep(dir: string) {
   const file = path.join(dir, "audit-data.json");
   const d = readJson<any>(file);
   if (!d) return { score: null, summary: {} };
-  const cats = (d.categories ?? []) as { name?: string; score?: number | null }[];
+  const cats = (d.categories ?? []) as { name?: string; score?: number | null; what_works?: string[]; findings?: any[] }[];
+  // Backfill Performance (CWV) from prefetched pagespeed-summary.json if the AI left it null.
+  const psi = readJson<PageSpeedSummary>(path.join(dir, "pagespeed-summary.json"));
+  const psiScore = psi?.mobile?.performance ?? psi?.desktop?.performance ?? null;
+  if (psi && psiScore != null) {
+    let perfCat = cats.find((c) => /performance|cwv|speed/i.test(String(c.name ?? "")));
+    if (!perfCat) {
+      perfCat = { name: "Performance (CWV)", score: null, what_works: [], findings: [] };
+      cats.push(perfCat);
+      d.categories = cats;
+    }
+    if (perfCat.score == null) {
+      perfCat.score = psiScore;
+      const m = psi.mobile;
+      const dt = psi.desktop;
+      const ev = `Mobile PSI: ${m.performance ?? "–"}/100 (LCP ${m.lcp_ms != null ? `${(m.lcp_ms / 1000).toFixed(2)}s` : "–"}, CLS ${m.cls ?? "–"}, TBT ${m.tbt_ms ?? "–"}ms) · Desktop PSI: ${dt.performance ?? "–"}/100`;
+      perfCat.what_works = [...(perfCat.what_works ?? []), ev];
+      perfCat.findings = (perfCat.findings ?? []).filter((f: any) => !/not measured|not run|not executed/i.test(JSON.stringify(f)));
+      if (m.lcp_ms != null && m.lcp_ms > 2500) {
+        perfCat.findings.push({
+          severity: m.lcp_ms > 4000 ? "Critical" : "High",
+          title: `Mobile LCP is ${(m.lcp_ms / 1000).toFixed(2)}s (target ≤ 2.5s)`,
+          description: ev,
+          recommendation: "Optimize hero image/font loading, preload LCP asset, and reduce render-blocking JS/CSS.",
+        });
+      }
+      if (m.cls != null && m.cls > 0.1) {
+        perfCat.findings.push({
+          severity: m.cls > 0.25 ? "High" : "Medium",
+          title: `Mobile CLS is ${m.cls} (target ≤ 0.1)`,
+          description: ev,
+          recommendation: "Reserve explicit width/height on images and avoid late-loading layout shifts above the fold.",
+        });
+      }
+      try { fs.writeFileSync(file, JSON.stringify(d, null, 2)); } catch { /* ignore */ }
+    }
+  }
   // Compute deterministic weighted score across measured (non-null) categories so missing data never skews the score.
   let wSum = 0;
   let vSum = 0;
@@ -288,8 +325,23 @@ async function runAgent(run: Run, dir: string, abort: AbortController): Promise<
     const a = parseJson<AuditInput>(run.input, {} as AuditInput);
     model = a.model || ai.claudeModel;
     budget = Math.min(a.budgetUsd || plan.deepBudgetUsd, plan.deepBudgetUsd || 3);
-    prompt = auditPrompt(a);
-    phases = auditPhases(a);
+    const psi = await prefetchPageSpeed(a.url, dir);
+    let psiNote = "";
+    if (psi) {
+      const m = psi.mobile;
+      const dt = psi.desktop;
+      if (m.performance != null || dt.performance != null) {
+        emit(run.id, { kind: "info", text: `Google PageSpeed fetched · Mobile ${m.performance ?? "–"}/100, Desktop ${dt.performance ?? "–"}/100` });
+        psiNote = `\n\nPRE-FETCHED PAGESPEED DATA (already saved in pagespeed-summary.json — DO NOT mark Performance as "not measured"):\nMobile: performance=${m.performance}/100, seo=${m.seo}/100, LCP=${m.lcp_ms}ms, FCP=${m.fcp_ms}ms, TBT=${m.tbt_ms}ms, CLS=${m.cls}, INP=${m.inp_ms}ms.\nDesktop: performance=${dt.performance}/100, seo=${dt.seo}/100, LCP=${dt.lcp_ms}ms, CLS=${dt.cls}.\nUse this exact measured data to score "Performance (CWV)" in findings/seo-performance.md and audit-data.json.`;
+      } else {
+        emit(run.id, { kind: "info", text: `Google PageSpeed check returned an error: ${m.error ?? dt.error ?? "unknown"}` });
+      }
+    }
+    prompt = auditPrompt(a) + psiNote;
+    const basePhases = auditPhases(a);
+    phases = psiNote
+      ? { collect: basePhases.collect + psiNote, strategy: basePhases.strategy + psiNote }
+      : basePhases;
   }
   return exec(prompt, model, budget, phases);
 }
