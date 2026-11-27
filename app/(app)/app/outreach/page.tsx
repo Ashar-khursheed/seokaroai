@@ -14,7 +14,7 @@ export const metadata = { title: "Reddit & Quora Outreach" };
 
 const STATUS_STYLE: Record<string, string> = {
   found: "bg-[var(--panel2)] muted ring-[var(--line)]",
-  drafted: "bg-brand-500/12 text-brand-500 ring-brand-500/30",
+  drafted: "bg-brand-500/12 text-brand-600 ring-brand-500/30",
   posted: "bg-low/12 text-low ring-low/30",
   skipped: "bg-[var(--panel2)] muted ring-[var(--line)] opacity-70",
 };
@@ -51,11 +51,12 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
 
   await ensureAddonTables();
   const projects = await userProjects(user.id);
-  const selectedProjectId = Number(sp.project) || projects[0]?.id || 0;
+  const projectFilter = sp.project && sp.project !== "all" ? Number(sp.project) || 0 : 0;
+  const defaultFormProjectId = projectFilter || projects[0]?.id || 0;
   const statusFilter = ["found", "drafted", "posted", "skipped"].includes(sp.status ?? "") ? sp.status! : "all";
 
   const conditions = [eq(schema.outreachItems.userId, user.id)];
-  if (selectedProjectId) conditions.push(eq(schema.outreachItems.projectId, selectedProjectId));
+  if (projectFilter) conditions.push(eq(schema.outreachItems.projectId, projectFilter));
   if (statusFilter !== "all") conditions.push(eq(schema.outreachItems.status, statusFilter));
 
   const items = await db()
@@ -66,6 +67,14 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
     .limit(60);
 
   const projectMap = new Map(projects.map((p) => [p.id, p]));
+
+  const buildHref = (nextProject: number | "all", nextStatus: string) => {
+    const qs = new URLSearchParams();
+    if (nextProject !== "all" && nextProject > 0) qs.set("project", String(nextProject));
+    if (nextStatus !== "all") qs.set("status", nextStatus);
+    const s = qs.toString();
+    return s ? `/app/outreach?${s}` : "/app/outreach";
+  };
 
   return (
     <div className="space-y-6">
@@ -84,39 +93,62 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
         </Card>
       ) : (
         <>
-          {/* Discovery form */}
+          {/* Discovery form — ActionForm wraps a nested grid so status banners span full width cleanly */}
           <Card title="Find new Reddit & Quora opportunities">
-            <ActionForm action={findOutreachOpportunities} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <select name="projectId" defaultValue={selectedProjectId} className="input">
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name} ({p.domain})</option>
-                ))}
-              </select>
-              <input name="topic" placeholder="Keyword or topic (optional — uses tracked keywords)" className="input lg:col-span-2" />
-              <div className="flex gap-2">
-                <select name="platform" defaultValue="all" className="input !w-auto">
-                  <option value="all">Both</option>
-                  <option value="reddit">Reddit</option>
-                  <option value="quora">Quora</option>
+            <ActionForm action={findOutreachOpportunities} className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <select name="projectId" defaultValue={defaultFormProjectId} className="input">
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name} ({p.domain})</option>
+                  ))}
                 </select>
-                <SubmitButton className="btn btn-brand flex-1" pendingText="Searching…">
-                  <Icon name="SearchCheck" size={15} />Find threads
-                </SubmitButton>
+                <input name="topic" placeholder="Keyword or topic (optional — uses tracked keywords)" className="input lg:col-span-2" />
+                <div className="flex gap-2">
+                  <select name="platform" defaultValue="all" className="input !w-auto">
+                    <option value="all">Both</option>
+                    <option value="reddit">Reddit</option>
+                    <option value="quora">Quora</option>
+                  </select>
+                  <SubmitButton className="btn btn-brand flex-1" pendingText="Searching…">
+                    <Icon name="SearchCheck" size={15} />Find threads
+                  </SubmitButton>
+                </div>
               </div>
             </ActionForm>
           </Card>
 
-          {/* Status filters */}
-          <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-1">
-            {["all", "found", "drafted", "posted", "skipped"].map((st) => (
-              <Link
-                key={st}
-                href={`/app/outreach?project=${selectedProjectId}${st === "all" ? "" : `&status=${st}`}`}
-                className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium capitalize transition ${statusFilter === st ? "border-brand-500 bg-brand-500 text-white" : "line bg-[var(--panel)] muted hover:text-[var(--ink)]"}`}
-              >
-                {st}
-              </Link>
-            ))}
+          {/* Project + Status filters */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-1">
+              {["all", "found", "drafted", "posted", "skipped"].map((st) => (
+                <Link
+                  key={st}
+                  href={buildHref(projectFilter || "all", st)}
+                  className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium capitalize transition ${statusFilter === st ? "border-brand-500 bg-brand-500 text-white" : "line bg-[var(--panel)] muted hover:text-[var(--ink)]"}`}
+                >
+                  {st}
+                </Link>
+              ))}
+            </div>
+            {projects.length > 1 && (
+              <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-1">
+                <Link
+                  href={buildHref("all", statusFilter)}
+                  className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${projectFilter === 0 ? "border-[var(--ink)] bg-[var(--ink)] text-white" : "line bg-[var(--panel)] muted hover:text-[var(--ink)]"}`}
+                >
+                  All websites
+                </Link>
+                {projects.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={buildHref(p.id, statusFilter)}
+                    className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${projectFilter === p.id ? "border-[var(--ink)] bg-[var(--ink)] text-white" : "line bg-[var(--panel)] muted hover:text-[var(--ink)]"}`}
+                  >
+                    {p.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Opportunity list */}
@@ -136,7 +168,7 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2 text-xs">
-                          <span className={`rounded-md px-2 py-0.5 font-semibold uppercase ${item.platform === "reddit" ? "bg-orange-500/15 text-orange-400" : "bg-rose-500/15 text-rose-400"}`}>
+                          <span className={`rounded-md px-2 py-0.5 font-semibold uppercase ${item.platform === "reddit" ? "bg-orange-500/12 text-orange-700" : "bg-rose-500/12 text-rose-700"}`}>
                             {item.platform}
                           </span>
                           {item.community && <span className="muted font-mono">{item.community}</span>}
@@ -193,7 +225,7 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
                       </form>
                       <form action={deleteOutreachItem} className="ml-auto">
                         <input type="hidden" name="itemId" value={item.id} />
-                        <button className="btn btn-ghost !py-1 text-xs !text-rose-500" title="Delete"><Icon name="Trash2" size={13} /></button>
+                        <button className="btn btn-ghost !py-1 text-xs !text-rose-600" title="Delete"><Icon name="Trash2" size={13} /></button>
                       </form>
                     </div>
                   </section>

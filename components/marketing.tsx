@@ -26,7 +26,7 @@ export function MarketingHeader() {
               </div>
             </div>
           </div>
-          {[["Tutorials", "/tutorials"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["About", "/about"]].map(([l, h]) => (
+          {[["Free Checker", "/website-seo-checker"], ["Pricing", "/pricing"], ["Tutorials", "/tutorials"], ["Blog", "/blog"]].map(([l, h]) => (
             <Link key={h} href={h} className="muted rounded-full px-3.5 py-2 font-medium transition hover:bg-[var(--panel2)] hover:text-[var(--ink)]">{l}</Link>
           ))}
         </nav>
@@ -68,9 +68,9 @@ export function MarketingFooter() {
           <p className="muted mt-4 max-w-xs text-sm leading-relaxed">AI SEO audits, rank tracking, competitor analysis and fixes that ship, in one place.</p>
           <a className="muted mt-4 inline-flex items-center gap-2 break-all text-sm hover:text-[var(--ink)]" href={`mailto:${config.supportEmail}`}><Icon name="Mail" size={15} />{config.supportEmail}</a>
         </div>
-        <FooterCol title="Product" links={[...FEATURES.map((f) => [f.name, `/features/${f.slug}`] as [string, string]), ["Pricing", "/pricing"]]} />
-        <FooterCol title="Resources" links={[["Video Tutorials", "/tutorials"], ["vs Semrush", "/compare/seokaroai-vs-semrush"], ["vs Ahrefs", "/compare/seokaroai-vs-ahrefs"], ["Semrush Alternatives", "/compare/semrush-alternatives"], ["WordPress Auto-Fix", "/integrations/wordpress"], ["Shopify Auto-Fix", "/integrations/shopify"], ["GitHub Auto-Fix", "/integrations/github"], ["Blog", "/blog"]]} />
-        <FooterCol title="Company" links={[["About", "/about"], ["Contact", "/contact"], ["Privacy", "/legal/privacy"], ["Terms", "/legal/terms"], ["Refunds", "/legal/refund"]]} />
+        <FooterCol title="Product" links={[["AI SEO Audit Tool", "/seo-audit-tool"], ["Site Audit Tool", "/site-audit-tool"], ["Free SEO Checker", "/website-seo-checker"], ...FEATURES.map((f) => [f.name, `/features/${f.slug}`] as [string, string]), ["Pricing", "/pricing"]]} />
+        <FooterCol title="Resources" links={[["Case Studies", "/case-studies"], ["Video Tutorials", "/tutorials"], ["vs Semrush", "/compare/seokaroai-vs-semrush"], ["vs Ahrefs", "/compare/seokaroai-vs-ahrefs"], ["Semrush Alternatives", "/compare/semrush-alternatives"], ["WordPress Auto-Fix", "/integrations/wordpress"], ["Shopify Auto-Fix", "/integrations/shopify"], ["GitHub Auto-Fix", "/integrations/github"], ["Blog", "/blog"]]} />
+        <FooterCol title="Company" links={[["About", "/about"], ["Security & Rollback", "/security"], ["Contact", "/contact"], ["Privacy", "/legal/privacy"], ["Terms", "/legal/terms"], ["Refunds", "/legal/refund"]]} />
       </div>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t line px-4 py-6 text-xs sm:px-6">
         <span className="muted">© {new Date().getFullYear()} SEOKaroAI · All rights reserved</span>

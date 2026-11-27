@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: p.metaTitle,
     description: p.metaDescription,
-    alternates: { canonical: `/integrations/${p.slug}` },
+    alternates: { canonical: `/integrations/${p.slug}`, languages: { en: `/integrations/${p.slug}`, "x-default": `/integrations/${p.slug}` } },
     openGraph: { title: p.metaTitle, description: p.metaDescription, images: [og] },
     twitter: { card: "summary_large_image", title: p.metaTitle, description: p.metaDescription, images: [og] },
   };
@@ -96,6 +96,11 @@ export default async function IntegrationPage({ params }: { params: Promise<{ sl
                 <li key={x} className="flex gap-2.5"><Icon name="ShieldCheck" size={16} className="mt-0.5 shrink-0 text-brand-500" /><span>{x}</span></li>
               ))}
             </ul>
+            <div className="mt-5 border-t line pt-4">
+              <Link href="/security" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline">
+                Read full Integrations Security &amp; Rollback doc <Icon name="ArrowRight" size={14} />
+              </Link>
+            </div>
           </div>
         </section>
 

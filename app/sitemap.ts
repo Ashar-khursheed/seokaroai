@@ -15,6 +15,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date().toISOString();
   return [
     { url: u("/"), lastModified: newest ?? now },
+    { url: u("/website-seo-checker"), lastModified: now },
+    { url: u("/seo-audit-tool"), lastModified: now },
+    { url: u("/site-audit-tool"), lastModified: now },
+    { url: u("/case-studies"), lastModified: now },
+    { url: u("/security"), lastModified: now },
     { url: u("/pricing"), lastModified: now },
     { url: u("/tutorials"), lastModified: now },
     { url: u("/features"), lastModified: now },

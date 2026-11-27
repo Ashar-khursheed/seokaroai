@@ -27,9 +27,13 @@ export async function findOutreachOpportunities(_: FormState, fd: FormData): Pro
   try {
     const r = await discoverOutreach(project, user.id, topic, platform);
     revalidatePath("/app/outreach");
-    return r.added > 0
-      ? { ok: true, message: `Found ${r.added} new discussion${r.added === 1 ? "" : "s"} for “${r.query}”.` }
-      : { ok: true, message: `No brand-new threads found for “${r.query}” right now. Try another keyword.` };
+    if (r.added > 0) {
+      return { ok: true, message: `Found ${r.added} new discussion${r.added === 1 ? "" : "s"} for “${r.query}” (${project.name}).` };
+    }
+    if (r.alreadySaved > 0) {
+      return { ok: true, message: `All ${r.alreadySaved} matching thread${r.alreadySaved === 1 ? "" : "s"} for “${r.query}” are already in ${project.name}’s list below.` };
+    }
+    return { ok: true, message: `No threads found for “${r.query}” right now. Try a broader keyword.` };
   } catch (e) {
     return { error: String((e as Error)?.message ?? e).slice(0, 300) };
   }
