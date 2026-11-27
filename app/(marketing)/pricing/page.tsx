@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PLANS, PAID_PLANS, type PlanCode } from "@/lib/plans";
+import { ADDON_LIST } from "@/lib/addons";
 import { config } from "@/lib/config";
 import { CtaBand, FaqList, JsonLd } from "@/components/marketing";
 
@@ -101,6 +102,31 @@ export default function Pricing() {
             </div>
           );
         })}
+      </section>
+
+      <section className="mx-auto mt-10 max-w-6xl px-4 sm:mt-14 sm:px-6">
+        <div className="mb-5">
+          <div className="text-xs font-bold uppercase tracking-wider text-brand-500">Optional Paid Add-on · Sold Separately</div>
+          <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] sm:text-2xl">Power up any plan with community outreach</h2>
+        </div>
+        <div className="grid gap-5 md:grid-cols-2">
+          {ADDON_LIST.map((a) => (
+            <div key={a.code} className="panel flex flex-col justify-between gap-5 p-5 sm:p-6">
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-lg font-bold">{a.name}</h3>
+                  <span className="chip !py-0.5 text-brand-500">Add-on · Separate billing</span>
+                </div>
+                <div className="mt-3 text-3xl font-semibold tracking-[-0.02em]">${a.priceMonthly}<span className="muted text-sm font-normal">/month</span></div>
+                <p className="muted mt-2 text-sm leading-relaxed">{a.tagline}</p>
+                <ul className="mt-4 space-y-2 text-sm">
+                  {a.highlights.map((h) => <li key={h} className="flex gap-2"><span className="text-emerald-500">✓</span>{h}</li>)}
+                </ul>
+              </div>
+              <Link href="/signup" className="btn btn-brand justify-center">Get {a.name} (${a.priceMonthly}/mo)</Link>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="mx-auto mt-12 max-w-6xl px-4 sm:mt-16 sm:px-6">
